@@ -89,7 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ThrottleDebounce\ThrottleDebounce.csproj">
-      <Project>{ac432d85-bd09-460d-9184-c971c2bfa668}</Project>
+      <Project>{0b82f05b-fa5d-4834-a662-664404b541b6}</Project>
       <Name>ThrottleDebounce</Name>
     </ProjectReference>
   </ItemGroup>
