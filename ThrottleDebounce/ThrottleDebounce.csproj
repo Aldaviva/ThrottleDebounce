@@ -1,7 +1,61 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{AC432D85-BD09-460D-9184-C971C2BFA668}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ThrottleDebounce</RootNamespace>
+    <AssemblyName>ThrottleDebounce</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <PackageId>ThrottleDebounce</PackageId>
+    <Authors>Ben Hutchison</Authors>
+    <Company>Blue Jeans Network, Inc.</Company>
+    <Product>ThrottleDebounce</Product>
+    <Description>Rate limit your actions and funcs by throttling and debouncing them.</Description>
+    <Copyright>2018 Blue Jeans Network, Inc.</Copyright>
+    <RepositoryUrl>https://github.com/Aldaviva/ThrottleDebounce</RepositoryUrl>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/Aldaviva/ThrottleDebounce/master/License.txt</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/Aldaviva/ThrottleDebounce</PackageProjectUrl>
+    <PackageTags>throttle debounce rate limit ratelimit rate-limit</PackageTags>
   </PropertyGroup>
-
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Debounced.cs" />
+    <Compile Include="Debouncer.cs" />
+    <Compile Include="DebouncerImpl.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Throttler.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ThrottleDebounce.nuspec" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,0 +1,1 @@
+nuget pack ThrottleDebounce\ThrottleDebounce.csproj -OutputDirectory ThrottleDebounce\bin\Release -Symbols -Properties Configuration=Release

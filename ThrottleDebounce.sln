@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThrottleDebounce", "ThrottleDebounce\ThrottleDebounce.csproj", "{7B21802F-ECF9-4BEE-80DE-73EF60498993}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThrottleDebounce", "ThrottleDebounce\ThrottleDebounce.csproj", "{AC432D85-BD09-460D-9184-C971C2BFA668}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary1", "ClassLibrary1\ClassLibrary1.csproj", "{8F594084-5903-4487-B8AD-307EC9CB17C3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo", "Demo\Demo.csproj", "{AFD318EC-CCE0-4203-A738-38CC80903516}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +15,18 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7B21802F-ECF9-4BEE-80DE-73EF60498993}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7B21802F-ECF9-4BEE-80DE-73EF60498993}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7B21802F-ECF9-4BEE-80DE-73EF60498993}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7B21802F-ECF9-4BEE-80DE-73EF60498993}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC432D85-BD09-460D-9184-C971C2BFA668}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC432D85-BD09-460D-9184-C971C2BFA668}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC432D85-BD09-460D-9184-C971C2BFA668}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC432D85-BD09-460D-9184-C971C2BFA668}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F594084-5903-4487-B8AD-307EC9CB17C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F594084-5903-4487-B8AD-307EC9CB17C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F594084-5903-4487-B8AD-307EC9CB17C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F594084-5903-4487-B8AD-307EC9CB17C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFD318EC-CCE0-4203-A738-38CC80903516}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFD318EC-CCE0-4203-A738-38CC80903516}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFD318EC-CCE0-4203-A738-38CC80903516}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFD318EC-CCE0-4203-A738-38CC80903516}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
