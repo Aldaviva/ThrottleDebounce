@@ -20,16 +20,16 @@
                 <ColumnDefinition Width="41*"/>
                 <ColumnDefinition Width="67*"/>
             </Grid.ColumnDefinitions>
-            <Label Content="Throttled" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="2" Height="23" Width="51"/>
-            <Label Content="Debounced (trailing)" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="3" Height="23" Width="102" />
-            <Label Content="Debounced (leading)" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="4" Height="23" Width="103"/>
-            <Label x:Name="throttled" VerticalAlignment="Top" Grid.Column="1" Grid.Row="2" Height="23" Width="201"/>
-            <Label x:Name="debouncedTrailing" VerticalAlignment="Top" Grid.Column="1" Grid.Row="3" Height="23" Width="201"/>
-            <Label x:Name="debouncedLeading" VerticalAlignment="Top" Grid.Column="1" Grid.Row="4" Height="23" Width="201"/>
-            <Label Content="Original" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top"/>
-            <Label x:Name="original" Grid.Column="1" Grid.Row="1" VerticalAlignment="Top" Width="201" Height="23"/>
-            <Label Content="Debounced (both)" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="5" Height="23" Width="103"/>
-            <Label x:Name="debouncedBoth" Content="" Grid.Column="1" HorizontalAlignment="Left" Grid.Row="5" VerticalAlignment="Top" Width="201"/>
+            <Label Content="Throttled" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="2" Height="28" Width="113"/>
+            <Label Content="Debounced (trailing)" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="3" Height="28" Width="113" />
+            <Label Content="Debounced (leading)" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="4" Height="28" Width="113"/>
+            <Label x:Name="throttled" VerticalAlignment="Top" Grid.Column="1" Grid.Row="2" Height="28" Width="201"/>
+            <Label x:Name="debouncedTrailing" VerticalAlignment="Top" Grid.Column="1" Grid.Row="3" Height="28" Width="201"/>
+            <Label x:Name="debouncedLeading" VerticalAlignment="Top" Grid.Column="1" Grid.Row="4" Height="28" Width="201"/>
+            <Label Content="Original" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Width="113" Height="29"/>
+            <Label x:Name="original" Grid.Column="1" Grid.Row="1" VerticalAlignment="Top" Width="201" Height="29"/>
+            <Label Content="Debounced (both)" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="5" Height="28" Width="113"/>
+            <Label x:Name="debouncedBoth" Content="" Grid.Column="1" HorizontalAlignment="Left" Grid.Row="5" VerticalAlignment="Top" Width="201" Height="28"/>
         </Grid>
 
     </Grid>

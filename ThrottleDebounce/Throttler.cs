@@ -4,6 +4,11 @@ namespace ThrottleDebounce {
 
     public static class Throttler {
 
+        public static DebouncedFunc<TResult> Throttle<TResult>(Func<TResult> func, TimeSpan wait, bool leading = true, bool trailing = true) {
+            return new DebouncerImpl<object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, TResult>(func, wait, leading,
+                trailing, wait);
+        }
+
         public static DebouncedFunc<T1, TResult> Throttle<T1, TResult>(Func<T1, TResult> func, TimeSpan wait, bool leading = true, bool trailing = true) {
             return new DebouncerImpl<T1, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, TResult>(func, wait, leading,
                 trailing, wait);
@@ -82,6 +87,11 @@ namespace ThrottleDebounce {
             Throttle<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>(Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> func,
                 TimeSpan wait, bool leading = true, bool trailing = true) {
             return new DebouncerImpl<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>(func, wait, leading, trailing, wait);
+        }
+
+        public static DebouncedAction Throttle(Action action, TimeSpan wait, bool leading = true, bool trailing = true) {
+            return new DebouncerImpl<object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object>(action, wait, leading,
+                trailing, wait);
         }
 
         public static DebouncedAction<T1> Throttle<T1>(Action<T1> action, TimeSpan wait, bool leading = true, bool trailing = true) {
