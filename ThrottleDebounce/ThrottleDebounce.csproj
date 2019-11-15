@@ -17,6 +17,8 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IncludeSource>True</IncludeSource>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <IncludeSymbols>true</IncludeSymbols>	
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
 </Project>
