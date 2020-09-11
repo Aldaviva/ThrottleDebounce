@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using Microsoft.Win32;
 using ThrottleDebounce;
 using ThrottleDebounce.RateLimitedDelegates;
 
@@ -81,6 +83,20 @@ namespace Demo {
             debouncerTrailing.Dispose();
             debouncerLeading.Dispose();
             debouncerBoth.Dispose();
+        }
+
+        public void documentationExamples() {
+            static void saveWindowLocation(double x, double y) => Registry.SetValue(@"HKEY_CURRENT_USER\Software\My Program", "Window Location", $"{x},{y}");
+            Action<double, double> saveWindowLocationThrottled = Throttler.Throttle<double, double>(saveWindowLocation, TimeSpan.FromSeconds(1)).RateLimitedAction;
+            LocationChanged += (sender, args) => saveWindowLocationThrottled(Left, Top);
+
+
+            Action<object, RoutedEventArgs> onButtonClickDebounced = Debouncer.Debounce<object, RoutedEventArgs>(onButtonClick, TimeSpan.FromMilliseconds(40), true, false).RateLimitedAction;
+            fireEventButton.Click += new RoutedEventHandler(onButtonClickDebounced);
+        }
+
+        private void onButtonClick(object sender, RoutedEventArgs e) {
+            MessageBox.Show("Button clicked");
         }
 
     }
