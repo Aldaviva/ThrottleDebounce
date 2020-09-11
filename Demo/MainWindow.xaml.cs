@@ -2,47 +2,87 @@
 using System.Windows;
 using System.Windows.Controls;
 using ThrottleDebounce;
+using ThrottleDebounce.RateLimitedDelegates;
+
+#nullable enable
 
 namespace Demo {
 
-    public partial class MainWindow : IDisposable {
+    public partial class MainWindow: IDisposable {
 
-        private readonly DebouncedAction<string> throttler;
-        private readonly DebouncedAction<string> debouncerTrailing;
-        private readonly DebouncedAction<string> debouncerLeading;
-        private readonly DebouncedAction<string> debouncerBoth;
+        private const string timeFormat = "h:mm:ss.fff tt";
+
+        private readonly RateLimitedAction<DateTime> throttler;
+        private readonly RateLimitedAction<DateTime> debouncerTrailing;
+        private readonly RateLimitedAction<DateTime> debouncerLeading;
+        private readonly RateLimitedAction<DateTime> debouncerBoth;
+
+        private DateTime lastOriginalExecutionTime;
+        private DateTime lastThrottledExecutionTime;
+        private DateTime lastDebouncedTrailingExecutionTime;
+        private DateTime lastDebouncedLeadingExecutionTime;
+        private DateTime lastDebouncedBothExecutionTime;
 
         public MainWindow() {
             InitializeComponent();
-            throttler = Throttler.Throttle<string>(now => Dispatcher.Invoke(() => UpdateLabelContent(throttled, now)), TimeSpan.FromSeconds(1));
-            debouncerTrailing = Debouncer.Debounce<string>(now => Dispatcher.Invoke(() => UpdateLabelContent(debouncedTrailing, now)), TimeSpan.FromSeconds(1), false, true);
-            debouncerLeading = Debouncer.Debounce<string>(now => Dispatcher.Invoke(() => UpdateLabelContent(debouncedLeading, now)), TimeSpan.FromSeconds(1), true, false);
-            debouncerBoth = Debouncer.Debounce<string>(now => Dispatcher.Invoke(() => UpdateLabelContent(debouncedBoth, now)), TimeSpan.FromSeconds(1), true, true);
+
+            TimeSpan waitTime = TimeSpan.FromSeconds(1);
+
+            throttler = Throttler.Throttle<DateTime>(invokedTime => Dispatcher.Invoke(() => {
+                DateTime now = DateTime.Now;
+                UpdateLabelContent(throttled, invokedTime, now, lastThrottledExecutionTime);
+                lastThrottledExecutionTime = now;
+            }), waitTime, leading: true, trailing: true);
+
+            debouncerTrailing = Debouncer.Debounce<DateTime>(invokedTime => Dispatcher.Invoke(() => {
+                DateTime now = DateTime.Now;
+                UpdateLabelContent(debouncedTrailing, invokedTime, now, lastDebouncedTrailingExecutionTime);
+                lastDebouncedTrailingExecutionTime = now;
+            }), waitTime, false, true);
+
+            debouncerLeading = Debouncer.Debounce<DateTime>(invokedTime => Dispatcher.Invoke(() => {
+                DateTime now = DateTime.Now;
+                UpdateLabelContent(debouncedLeading, invokedTime, now, lastDebouncedLeadingExecutionTime);
+                lastDebouncedLeadingExecutionTime = now;
+            }), waitTime, true, false);
+
+            debouncerBoth = Debouncer.Debounce<DateTime>(invokedTime => Dispatcher.Invoke(() => {
+                DateTime now = DateTime.Now;
+                UpdateLabelContent(debouncedBoth, invokedTime, now, lastDebouncedBothExecutionTime);
+                lastDebouncedBothExecutionTime = now;
+            }), waitTime, true, true);
+
+            fireEventButton.Focus();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e) {
-            string now = GetNow();
+            DateTime now = DateTime.Now;
 
-            UpdateLabelContent(original, now);
-            throttler.Run(now);
-            debouncerTrailing.Run(now);
-            debouncerLeading.Run(now);
-            debouncerBoth.Run(now);
+            UpdateLabelContent(original, now, now, lastOriginalExecutionTime);
+            lastOriginalExecutionTime = now;
+
+            throttler.RateLimitedAction(now);
+            debouncerTrailing.RateLimitedAction(now);
+            debouncerLeading.RateLimitedAction(now);
+            debouncerBoth.RateLimitedAction(now);
         }
 
-        private static string GetNow() {
-            return DateTime.Now.ToString("h:mm:ss.fff tt");
-        }
+        // private static string GetNow() {
+        //     return DateTime.Now.ToString("h:mm:ss.fff tt");
+        // }
 
-        private static void UpdateLabelContent(Label label, string content) {
-            label.Content = content;
+        private static void UpdateLabelContent(Label label, DateTime invokedTime, DateTime executedTime, DateTime previousExecutedTime) {
+            label.Content = $"Invoked at {invokedTime.ToString(timeFormat)}, executed at {executedTime.ToString(timeFormat)}" +
+                (previousExecutedTime != default ? $", since last execution {executedTime - previousExecutedTime:g}" : "");
         }
 
         public void Dispose() {
-            throttler?.Dispose();
-            debouncerTrailing?.Dispose();
-            debouncerLeading?.Dispose();
-            debouncerBoth?.Dispose();
+            throttler.Dispose();
+            debouncerTrailing.Dispose();
+            debouncerLeading.Dispose();
+            debouncerBoth.Dispose();
         }
+
     }
+
 }

@@ -6,10 +6,9 @@
         mc:Ignorable="d"
         Title="ThrottleDebounce Demo" Height="450" Width="800" ResizeMode="CanMinimize">
     <Grid>
-        <Button Content="Fire event" Margin="100,0,100,42" Click="Button_Click" Height="87" VerticalAlignment="Bottom"/>
-        <Grid Height="230" Margin="234,36,234,154" Width="324">
+        <Button x:Name="fireEventButton" Content="Fire event" Margin="100,0,100,42" Click="Button_Click" Height="87" VerticalAlignment="Bottom" />
+        <Grid Height="230" Margin="100,36,100,154">
             <Grid.RowDefinitions>
-                <RowDefinition />
                 <RowDefinition />
                 <RowDefinition />
                 <RowDefinition />
@@ -17,19 +16,19 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="41*"/>
-                <ColumnDefinition Width="67*"/>
+                <ColumnDefinition Width="138" />
+                <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <Label Content="Throttled" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="2" Height="28" Width="113"/>
-            <Label Content="Debounced (trailing)" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="3" Height="28" Width="113" />
-            <Label Content="Debounced (leading)" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="4" Height="28" Width="113"/>
-            <Label x:Name="throttled" VerticalAlignment="Top" Grid.Column="1" Grid.Row="2" Height="28" Width="201"/>
-            <Label x:Name="debouncedTrailing" VerticalAlignment="Top" Grid.Column="1" Grid.Row="3" Height="28" Width="201"/>
-            <Label x:Name="debouncedLeading" VerticalAlignment="Top" Grid.Column="1" Grid.Row="4" Height="28" Width="201"/>
-            <Label Content="Original" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Width="113" Height="29"/>
-            <Label x:Name="original" Grid.Column="1" Grid.Row="1" VerticalAlignment="Top" Width="201" Height="29"/>
-            <Label Content="Debounced (both)" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="5" Height="28" Width="113"/>
-            <Label x:Name="debouncedBoth" Content="" Grid.Column="1" HorizontalAlignment="Left" Grid.Row="5" VerticalAlignment="Top" Width="201" Height="28"/>
+            <Label Content="Original" Grid.Row="0" Grid.Column="0" />
+            <Label Content="Throttled" Grid.Row="1" Grid.Column="0" />
+            <Label Content="Debounced (trailing)" Grid.Row="2" Grid.Column="0" />
+            <Label Content="Debounced (leading)" Grid.Row="3" Grid.Column="0" />
+            <Label Content="Debounced (both)" Grid.Row="4" Grid.Column="0" />
+            <Label x:Name="original" Grid.Column="1" Grid.Row="0" />
+            <Label x:Name="throttled" Grid.Column="1" Grid.Row="1" />
+            <Label x:Name="debouncedTrailing" Grid.Column="1" Grid.Row="2" />
+            <Label x:Name="debouncedLeading" Grid.Column="1" Grid.Row="3" />
+            <Label x:Name="debouncedBoth" Grid.Column="1" Grid.Row="4" />
         </Grid>
 
     </Grid>
