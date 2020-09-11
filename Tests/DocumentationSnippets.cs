@@ -2,6 +2,9 @@
 using ThrottleDebounce;
 using ThrottleDebounce.RateLimitedDelegates;
 
+// ReSharper disable RedundantAssignment
+// ReSharper disable NotAccessedVariable
+
 namespace Tests {
 
     public class DocumentationSnippets {
@@ -17,7 +20,10 @@ namespace Tests {
             Func<double, double, double> debounced = Debouncer.Debounce((double x, double y) => Math.Sqrt(x * x + y * y),
                 TimeSpan.FromMilliseconds(200)).RateLimitedFunc;
 
-            double result = debounced(3, 4); //runs at 200ms
+            double result; //runs at 200ms
+            result = debounced(1, 1);
+            result = debounced(2, 2);
+            result = debounced(3, 4);
         }
 
         public void dispose() {

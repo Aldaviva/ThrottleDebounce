@@ -26,9 +26,10 @@ namespace ThrottleDebounce {
         private readonly Timer    minTimer;
         private readonly Timer    maxTimer;
 
-        private int               queuedInvocations;
-        private object[]          mostRecentInvocationParameters;
-        private TResult           mostRecentResult;
+        private int      queuedInvocations;
+        private object[] mostRecentInvocationParameters;
+        private TResult  mostRecentResult;
+        private bool     disposed;
 
         internal RateLimiter(Delegate rateLimitedCallback, TimeSpan wait, bool leading, bool trailing, TimeSpan maxWait = default) {
             if (!leading && !trailing) {
@@ -53,33 +54,42 @@ namespace ThrottleDebounce {
         }
 
         private void WaitTimeHasElapsed() {
-            if (Interlocked.Exchange(ref queuedInvocations, 0) > 0) {
+            if (Interlocked.Exchange(ref queuedInvocations, 0) > 0 && !disposed) {
                 mostRecentResult = (TResult) rateLimitedCallback.DynamicInvoke(mostRecentInvocationParameters);
 
-                minTimer.Stop();
-                minTimer.Start();
-                maxTimer?.Start();
+                resetTimers();
             }
         }
 
         private TResult OnUserInvocation(object[] arguments) {
-            mostRecentInvocationParameters = arguments;
+            if (!disposed) {
+                mostRecentInvocationParameters = arguments;
 
-            bool minTimerRunning = minTimer.Enabled;
-            if (leading && !minTimerRunning) {
-                mostRecentResult = (TResult) rateLimitedCallback.DynamicInvoke(arguments);
-            } else if (trailing) {
-                Interlocked.Add(ref queuedInvocations, 1);
+                bool minTimerRunning = minTimer.Enabled;
+                if (leading && !minTimerRunning) {
+                    mostRecentResult = (TResult) rateLimitedCallback.DynamicInvoke(arguments);
+                } else if (trailing) {
+                    Interlocked.Add(ref queuedInvocations, 1);
+                }
+
+                resetTimers();
             }
-
-            minTimer.Stop();
-            minTimer.Start();
-            maxTimer?.Start();
 
             return mostRecentResult;
         }
 
+        private void resetTimers() {
+            try {
+                minTimer.Stop();
+                minTimer.Start();
+                maxTimer?.Start();
+            } catch (ObjectDisposedException) {
+                //Do nothing. Don't try to start timers if they have been concurrently disposed of in another thread.
+            }
+        }
+
         public void Dispose() {
+            disposed = true;
             minTimer.Dispose();
             maxTimer?.Dispose();
             queuedInvocations = 0;

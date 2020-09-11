@@ -205,6 +205,24 @@ namespace Tests {
 
         }
 
+        
+        public class DisposingPreventsImmediateExecutionsClass: ThrottlerTest {
+
+            [Fact]
+            public void DisposingPreventsImmediateExecutions() {
+                RateLimitedAction rateLimited = Throttler.Throttle(() => { ++executionCount; }, WAIT_TIME, leading: true, trailing: true);
+                Action throttled = rateLimited.RateLimitedAction;
+
+                executionCount.Should().Be(0);
+
+                rateLimited.Dispose();
+
+                throttled();
+                executionCount.Should().Be(0);
+            }
+
+        }
+
     }
 
 }
