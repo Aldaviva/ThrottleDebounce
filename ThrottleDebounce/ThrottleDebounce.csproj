@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net40</TargetFrameworks>
@@ -7,9 +7,9 @@
     <Authors>Ben Hutchison</Authors>
     <Company>Blue Jeans Network, Inc.</Company>
     <Product>ThrottleDebounce</Product>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <Description>Rate limit your actions and funcs by throttling and debouncing them.</Description>
-    <Copyright>2019 Blue Jeans Network, Inc.</Copyright>
+    <Copyright>2020 Blue Jeans Network, Inc.</Copyright>
     <PackageProjectUrl>https://github.com/Aldaviva/ThrottleDebounce</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Aldaviva/ThrottleDebounce.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

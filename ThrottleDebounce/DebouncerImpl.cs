@@ -54,6 +54,10 @@ namespace ThrottleDebounce {
         private void WaitTimeHasElapsed() {
             if (Interlocked.Exchange(ref queuedInvocations, 0) > 0) {
                 mostRecentResult = (TResult) rateLimitedCallback.DynamicInvoke(mostRecentInvocationParameters);
+
+                minTimer.Stop();
+                minTimer.Start();
+                maxTimer?.Start();
             }
         }
 
