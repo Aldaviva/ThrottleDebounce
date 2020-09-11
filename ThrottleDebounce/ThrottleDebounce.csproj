@@ -1,24 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net40</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
-    <PackageId>ThrottleDebounce</PackageId>
-    <Authors>Ben Hutchison</Authors>
-    <Company>Blue Jeans Network, Inc.</Company>
-    <Product>ThrottleDebounce</Product>
-    <Version>2.0.0</Version>
-    <Description>Rate limit your actions and funcs by throttling and debouncing them.</Description>
-    <Copyright>2020 Blue Jeans Network, Inc.</Copyright>
-    <PackageProjectUrl>https://github.com/Aldaviva/ThrottleDebounce</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/Aldaviva/ThrottleDebounce.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageTags>throttle debounce rate limit rate-limit ratelimit</PackageTags>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <IncludeSource>True</IncludeSource>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <IncludeSymbols>true</IncludeSymbols>	
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFrameworks>netstandard2.0;net40</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
+        <PackageId>ThrottleDebounce</PackageId>
+        <Authors>Ben Hutchison</Authors>
+        <Company>Blue Jeans Network, Inc.</Company>
+        <Product>ThrottleDebounce</Product>
+        <Version>2.0.0-SNAPSHOT</Version>
+        <Description>Rate limit your actions and funcs by throttling and debouncing them.</Description>
+        <Copyright>© 2022 Blue Jeans Network, Inc.</Copyright>
+        <PackageProjectUrl>https://github.com/Aldaviva/ThrottleDebounce</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Aldaviva/ThrottleDebounce.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>throttle debounce rate limit rate-limit ratelimit</PackageTags>
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <IncludeSource>True</IncludeSource>
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    </PropertyGroup>
 
 </Project>

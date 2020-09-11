@@ -9,6 +9,7 @@ namespace OverloadGenerator {
 
         private static void Main() {
             Console.WriteLine(generateBuilderMethods(false));
+            Console.WriteLine(generateBuilderMethods(true));
             Console.WriteLine(generateInterfaces());
             Console.WriteLine(generateImplementationMethods());
             Console.WriteLine(generateTests());
@@ -16,13 +17,15 @@ namespace OverloadGenerator {
 
         private static string generateInterfaces() {
             string actions = string.Join("\n\n", Enumerable.Range(1, MAX_TYPE_PARAMS)
-                .Select(i => $"public interface RateLimitedAction<{joinNumbers(i, "in T")}>: IDisposable {{\n" +
-                    $"\tAction<{joinNumbers(i)}> RateLimitedAction {{ get; }}\n" +
+                .Select(paramCount => $"public interface RateLimitedAction<{joinNumbers(paramCount, "in T")}>: IDisposable {{\n" +
+                    // $"\tAction<{joinNumbers(i)}> RateLimitedAction {{ get; }}\n" +
+                    $"\tvoid Invoke({joinNumbers(paramCount, i => $"T{i} arg{i}")});\n" +
                     "}"));
 
             string funcs = string.Join("\n\n", Enumerable.Range(1, MAX_TYPE_PARAMS)
-                .Select(i => $"public interface RateLimitedFunc<{joinNumbers(i, "in T")}, out TResult>: IDisposable {{\n" +
-                    $"\tFunc<{joinNumbers(i)}, TResult> RateLimitedFunc {{ get; }}\n" +
+                .Select(paramCount => $"public interface RateLimitedFunc<{joinNumbers(paramCount, "in T")}, out TResult>: IDisposable {{\n" +
+                    // $"\tFunc<{joinNumbers(i)}, TResult> RateLimitedFunc {{ get; }}\n" +
+                    $"\tTResult? Invoke({joinNumbers(paramCount, i => $"T{i} arg{i}")});\n" +
                     "}"));
 
             return actions + funcs;
@@ -44,19 +47,20 @@ namespace OverloadGenerator {
                     $"\treturn new RateLimiter<{joinNumbers(i)}{string.Join(null, Enumerable.Repeat(", object", MAX_TYPE_PARAMS - i))}, TResult>(func, wait, leading, trailing{maxWait});\n" +
                     "}"));
 
-            return actions + funcs;
+            return actions + "\n\n" + funcs;
         }
 
         private static string generateImplementationMethods() {
             string actions = string.Join("\n\n", Enumerable.Range(1, MAX_TYPE_PARAMS)
-                .Select(i =>
-                    $"Action<{joinNumbers(i)}> RateLimitedAction<{joinNumbers(i)}>.RateLimitedAction => ({joinNumbers(i, "arg")}) => {{ OnUserInvocation(new object[]{{ {joinNumbers(i, "arg")} }}); }};"));
+                .Select(paramCount =>
+                    $"void RateLimitedAction<{joinNumbers(paramCount)}>.Invoke({joinNumbers(paramCount, i => $"T{i} arg{i}")}) => OnUserInvocation(new object[]{{ {joinNumbers(paramCount, "arg", suffix: "!")} }});"));
 
             string funcs = string.Join("\n\n", Enumerable.Range(1, MAX_TYPE_PARAMS)
-                .Select(i =>
-                    $"Func<{joinNumbers(i)}, TResult> RateLimitedFunc<{joinNumbers(i)}, TResult>.RateLimitedFunc => ({joinNumbers(i, "arg")}) =>OnUserInvocation(new object[]{{ {joinNumbers(i, "arg")} }});"));
+                .Select(paramCount =>
+                    $"TResult? RateLimitedFunc<{joinNumbers(paramCount)}, TResult>.Invoke({joinNumbers(paramCount, i => $"T{i} arg{i}")}) => OnUserInvocation(new object[]{{ {joinNumbers(paramCount, "arg", suffix: "!")} }});"));
+            // $"Func<{joinNumbers(i)}, TResult> RateLimitedFunc<{joinNumbers(i)}, TResult>.RateLimitedFunc => ({joinNumbers(i, "arg")}) => OnUserInvocation(new object[]{{ {joinNumbers(i, "arg", suffix: "!")} }});"));
 
-            return actions + funcs;
+            return actions + "\n\n" + funcs;
         }
 
         private static string generateTests() {
@@ -84,7 +88,11 @@ namespace OverloadGenerator {
         }
 
         private static string joinNumbers(int max, string prefix = "T", string joiner = ", ", string suffix = "", int min = 1) {
-            return string.Join(joiner, Enumerable.Range(min, max - min + 1).Select(i => $"{prefix}{i}{suffix}"));
+            return joinNumbers(max, i => $"{prefix}{i}{suffix}", joiner, min);
+        }
+
+        private static string joinNumbers(int max, Func<int, string> template, string joiner = ", ", int min = 1) {
+            return string.Join(joiner, Enumerable.Range(min, max - min + 1).Select(template));
         }
 
         private static string joinRepeat(string element, int count, string joiner = ", ") {

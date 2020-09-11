@@ -7,7 +7,7 @@
         Title="ThrottleDebounce Demo" Height="450" Width="800" ResizeMode="CanMinimize">
     <Grid>
         <Button x:Name="fireEventButton" Content="Fire event" Margin="100,0,100,42" Click="Button_Click" Height="87" VerticalAlignment="Bottom" />
-        <Grid Height="230" Margin="100,36,100,154">
+        <Grid Height="230" Margin="36,36,36,154">
             <Grid.RowDefinitions>
                 <RowDefinition />
                 <RowDefinition />
@@ -19,11 +19,11 @@
                 <ColumnDefinition Width="138" />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <Label Content="Original" Grid.Row="0" Grid.Column="0" />
-            <Label Content="Throttled" Grid.Row="1" Grid.Column="0" />
-            <Label Content="Debounced (trailing)" Grid.Row="2" Grid.Column="0" />
-            <Label Content="Debounced (leading)" Grid.Row="3" Grid.Column="0" />
-            <Label Content="Debounced (both)" Grid.Row="4" Grid.Column="0" />
+            <Label Content="Original" Grid.Row="0" Grid.Column="0" FontWeight="Bold" />
+            <Label Content="Throttled" Grid.Row="1" Grid.Column="0" FontWeight="Bold" />
+            <Label Content="Debounced (trailing)" Grid.Row="2" Grid.Column="0" FontWeight="Bold" />
+            <Label Content="Debounced (leading)" Grid.Row="3" Grid.Column="0" FontWeight="Bold" />
+            <Label Content="Debounced (both)" Grid.Row="4" Grid.Column="0" FontWeight="Bold" />
             <Label x:Name="original" Grid.Column="1" Grid.Row="0" />
             <Label x:Name="throttled" Grid.Column="1" Grid.Row="1" />
             <Label x:Name="debouncedTrailing" Grid.Column="1" Grid.Row="2" />

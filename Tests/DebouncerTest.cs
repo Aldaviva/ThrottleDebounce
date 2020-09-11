@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using FluentAssertions;
 using ThrottleDebounce;
-using ThrottleDebounce.RateLimitedDelegates;
 using Xunit;
 
 namespace Tests {
@@ -36,7 +35,7 @@ namespace Tests {
 
             [Fact]
             public async void DebounceActionLeadingAndTrailing() {
-                Func<int> debounced = Debouncer.Debounce(() => ++executionCount, WAIT_TIME, leading: true, trailing: true).RateLimitedFunc;
+                Func<int> debounced = Debouncer.Debounce(() => ++executionCount, WAIT_TIME, leading: true, trailing: true).Invoke;
 
                 int result = debounced();
                 result.Should().Be(1);
@@ -61,7 +60,7 @@ namespace Tests {
 
             [Fact]
             public async void DebounceMakesProgressDuringRepeatedInvocations() {
-                Func<int> debounced = Debouncer.Debounce(() => ++executionCount, WAIT_TIME, leading: true, trailing: true).RateLimitedFunc;
+                Func<int> debounced = Debouncer.Debounce(() => ++executionCount, WAIT_TIME, leading: true, trailing: true).Invoke;
 
                 // 0.0s
                 int result = debounced.Invoke();
@@ -110,7 +109,7 @@ namespace Tests {
 
             [Fact]
             public async void DebounceActionLeadingOnly() {
-                Func<int> debounced = Debouncer.Debounce(() => ++executionCount, WAIT_TIME, leading: true, trailing: false).RateLimitedFunc;
+                Func<int> debounced = Debouncer.Debounce(() => ++executionCount, WAIT_TIME, leading: true, trailing: false).Invoke;
 
                 int result = debounced.Invoke();
                 result.Should().Be(1);
@@ -135,7 +134,7 @@ namespace Tests {
 
             [Fact]
             public async void DebounceActionTrailingOnly() {
-                Func<int> debounced = Debouncer.Debounce(() => ++executionCount, WAIT_TIME, leading: false, trailing: true).RateLimitedFunc;
+                Func<int> debounced = Debouncer.Debounce(() => ++executionCount, WAIT_TIME, leading: false, trailing: true).Invoke;
 
                 int result = debounced.Invoke();
                 result.Should().Be(default);
@@ -161,7 +160,7 @@ namespace Tests {
             [Fact]
             public async void DisposingPreventsLaterExecutions() {
                 RateLimitedFunc<int> rateLimited = Debouncer.Debounce(() => ++executionCount, WAIT_TIME, leading: true, trailing: true);
-                Func<int> debounced = rateLimited.RateLimitedFunc;
+                Func<int>            debounced   = rateLimited.Invoke;
 
                 int result = debounced();
                 result.Should().Be(1);
