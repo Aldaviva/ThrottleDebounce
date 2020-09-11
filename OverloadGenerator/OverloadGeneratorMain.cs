@@ -8,7 +8,7 @@ namespace OverloadGenerator {
         private const int MAX_TYPE_PARAMS = 16;
 
         private static void Main() {
-            Console.WriteLine(generateBuilderMethods("Debounce", false));
+            Console.WriteLine(generateBuilderMethods(false));
             Console.WriteLine(generateInterfaces());
             Console.WriteLine(generateImplementationMethods());
             Console.WriteLine(generateTests());
@@ -28,17 +28,20 @@ namespace OverloadGenerator {
             return actions + funcs;
         }
 
-        private static string generateBuilderMethods(string methodName, bool leading) {
+        private static string generateBuilderMethods(bool throttle) {
+            string methodName = throttle ? "Throttle" : "Debounce";
+            bool leading = throttle;
+            string maxWait = throttle ? ", wait" : "";
             string actions = string.Join("\n\n", Enumerable.Range(1, MAX_TYPE_PARAMS)
                 .Select(i =>
                     $"public static RateLimitedAction<{joinNumbers(i)}> {methodName}<{joinNumbers(i)}>(Action<{joinNumbers(i)}> action, TimeSpan wait, bool leading = {leading.ToString().ToLowerInvariant()}, bool trailing = true) {{\n" +
-                    $"\treturn new RateLimiter<{joinNumbers(i)}{string.Join(null, Enumerable.Repeat(", object", MAX_TYPE_PARAMS - i))}, object>(action, wait, leading, trailing);\n" +
+                    $"\treturn new RateLimiter<{joinNumbers(i)}{string.Join(null, Enumerable.Repeat(", object", MAX_TYPE_PARAMS - i))}, object>(action, wait, leading, trailing{maxWait});\n" +
                     "}"));
 
             string funcs = string.Join("\n\n", Enumerable.Range(1, MAX_TYPE_PARAMS)
                 .Select(i =>
                     $"public static RateLimitedFunc<{joinNumbers(i)}, TResult> {methodName}<{joinNumbers(i)}, TResult>(Func<{joinNumbers(i)}, TResult> func, TimeSpan wait, bool leading = {leading.ToString().ToLowerInvariant()}, bool trailing = true) {{\n" +
-                    $"\treturn new RateLimiter<{joinNumbers(i)}{string.Join(null, Enumerable.Repeat(", object", MAX_TYPE_PARAMS - i))}, TResult>(func, wait, leading, trailing);\n" +
+                    $"\treturn new RateLimiter<{joinNumbers(i)}{string.Join(null, Enumerable.Repeat(", object", MAX_TYPE_PARAMS - i))}, TResult>(func, wait, leading, trailing{maxWait});\n" +
                     "}"));
 
             return actions + funcs;
