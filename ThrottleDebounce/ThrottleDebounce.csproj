@@ -14,7 +14,7 @@
         <RepositoryUrl>https://github.com/Aldaviva/ThrottleDebounce.git</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>throttle debounce rate limit rate-limit ratelimit</PackageTags>
-        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
         <IncludeSource>True</IncludeSource>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>

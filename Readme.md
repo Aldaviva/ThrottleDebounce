@@ -41,16 +41,24 @@ It targets .NET Standard 2.0 and .NET Framework 4.0, so it should be compatible 
 ## Usage
 
 ```cs
-RateLimitedAction throttled = Throttler.Throttle(Action action, TimeSpan wait, bool leading, bool trailing);
-RateLimitedFunc<T> debounced = Debouncer.Debounce(Func<T> func, TimeSpan wait, bool leading, bool trailing);
+Action originalAction;
+Func<int> originalFunc;
+
+TimeSpan wait = TimeSpan.FromMilliseconds(50);
+using RateLimitedAction throttledAction = Throttler.Throttle(originalAction, wait, leading: true, trailing: true);
+using RateLimitedFunc<int> debouncedFunc = Debouncer.Debounce(originalFunc, wait, leading: false, trailing: true);
+
+throttledAction.Invoke();
+int? result = debouncedFunc.Invoke();
 ```
 
-1. Call `Throttler.Throttle()` to throttle your action or func, or `Debouncer.Debounce()` to debounce it. Pass
-    1. **`Action action`/`Func func`** — your action or func to rate-limit
-    1. **`wait`** — how long to wait between executions
-    1. **`leading`** — `true` if the first invocation should be executed immediately, or `false` if it should be queued. Optional, defaults to `true` for throttling and `false` for debouncing.
-    1. **`trailing`** — `true` if subsequent invocations in the waiting period should be enqueued for later execution once the waiting interval is over, or `false` if they should be discarded. Optional, defaults to `true`.
-1. Call the resulting object's `Invoke()` method to enqueue an invocation.
+1. Call **`Throttler.Throttle()`** to throttle your delegate, or **`Debouncer.Debounce()`** to debounce it. Pass
+    1. **`Action action`/`Func func`** — your delegate to rate-limit
+    1. **`TimeSpan wait`** — how long to wait between executions
+    1. **`bool leading`** — `true` if the first invocation should be executed immediately, or `false` if it should be queued. Optional, defaults to `true` for throttling and `false` for debouncing.
+    1. **`bool trailing`** — `true` if subsequent invocations in the waiting period should be enqueued for later execution once the waiting interval is over, or `false` if they should be discarded. Optional, defaults to `true`.
+1. Call the resulting `RateLimitedAction`/`RateLimitedFunc` object's **`Invoke()`** method to enqueue an invocation.
+    - `RateLimitedFunc.Invoke` will return `default` (e.g. `null`) if `leading` is `false` and the rate-limited `Func` has not been executed before. Otherwise, it will return the `Func`'s most recent return value.
 1. Your delegate will be executed at the desired rate.
 1. Optionally call the `RateLimitedAction`/`RateLimitedFunc` object's `Dispose()` method to prevent all queued executions from running when you are done.
 
@@ -66,6 +74,8 @@ This is useful if the function is invoked very frequently, like whenever the mou
 **Throttling** allows the function to still be executed periodically, even with a constant stream of invocations.
 
 **Debouncing** prevents the function from being executed at all until it hasn't been invoked for a while.
+
+An invocation can result in at most one execution. For example, if both `leading` and `trailing` are `true`, one single invocation will execute once on the leading edge and not on the trailing edge.
 
 <a id="diagram"></a>
 ### Diagram
@@ -90,9 +100,10 @@ This is useful if the function is invoked very frequently, like whenever the mou
 ```cs
 Action throttled = Throttler.Throttle(() => Console.WriteLine("hi"), TimeSpan.FromSeconds(1)).Invoke;
 
-throttled(); //runs at 0s
-throttled(); //runs at 1s
-throttled(); //runs at 2s
+throttled(); //logs at 0s
+throttled(); //logs at 1s
+Thread.Sleep(1000);
+throttled(); //logs at 2s
 ```
 
 <a id="debounce-a-function-to-execute-after-no-invocations-for-200-milliseconds"></a>
@@ -101,7 +112,7 @@ throttled(); //runs at 2s
 Func<double, double, double> debounced = Debouncer.Debounce((double x, double y) => Math.Sqrt(x * x + y * y),
     TimeSpan.FromMilliseconds(200)).Invoke;
 
-double result;
+double? result;
 result = debounced(1, 1); //never runs
 result = debounced(2, 2); //never runs
 result = debounced(3, 4); //runs at 200ms
