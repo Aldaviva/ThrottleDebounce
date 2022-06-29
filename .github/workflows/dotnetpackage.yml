@@ -21,12 +21,12 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --no-restore --configuration Release
+      run: dotnet build ${{ProjectName}} --no-restore --configuration Release
 
       # ensure the test project name is correct (e.g. "Test" vs. "Tests")
     - name: Test
       run: |
-        dotnet test --no-build --verbosity normal --configuration Release --collect:"XPlat Code Coverage" --settings Tests/coverlet.runsettings
+        dotnet test --verbosity normal --configuration Release --collect:"XPlat Code Coverage" --settings Tests/coverlet.runsettings
         mv Tests/TestResults/*/coverage.info Tests/TestResults
 
     - name: Pack
