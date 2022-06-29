@@ -1,0 +1,45 @@
+name: .NET
+
+on:
+  push:
+    branches: [ master ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    env:
+      ProjectName: ThrottleDebounce
+
+    runs-on: windows-latest
+
+    steps:
+    - name: Clone
+      uses: actions/checkout@v3
+        
+    - name: Restore
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+
+      # ensure the test project name is correct (e.g. "Test" vs. "Tests")
+    - name: Test
+      run: |
+        dotnet test --no-build --verbosity normal --configuration Release --collect:"XPlat Code Coverage" --settings Tests/coverlet.runsettings
+        mv Tests/TestResults/*/coverage.info Tests/TestResults
+
+    - name: Pack
+      run: dotnet pack ${{ env.ProjectName }} --no-build --configuration Release
+
+    - name: Upload package
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.ProjectName }}.nupkg
+        path: ${{ env.ProjectName }}/bin/Release/*.*nupkg
+
+    - name: Upload coverage
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: Test/TestResults/coverage.info
