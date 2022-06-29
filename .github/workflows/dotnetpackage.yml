@@ -26,7 +26,7 @@ jobs:
       # ensure the test project name is correct (e.g. "Test" vs. "Tests")
     - name: Test
       run: |
-        dotnet test --verbosity normal --configuration Release --collect:"XPlat Code Coverage" --settings Tests/coverlet.runsettings
+        dotnet test --configuration Release --collect:"XPlat Code Coverage" --settings Tests/coverlet.runsettings
         mv Tests/TestResults/*/coverage.info Tests/TestResults
 
     - name: Pack

@@ -62,45 +62,39 @@ namespace Tests {
             public async void DebounceMakesProgressDuringRepeatedInvocations() {
                 Func<int> debounced = Debouncer.Debounce(() => ++executionCount, WAIT_TIME, leading: true, trailing: true).Invoke;
 
-                // 0.0s
                 int result = debounced.Invoke();
-                result.Should().Be(1);
-                executionCount.Should().Be(1);
+                result.Should().Be(1, "result after 0 seconds");
+                executionCount.Should().Be(1, "executionCount after 0 seconds and 1 invocation");
                 await Task.Delay(WAIT_TIME / 2);
 
-                // 0.5s
-                executionCount.Should().Be(1);
+                executionCount.Should().Be(1, "executionCount after 0.5 seconds and 1 invocation");
                 result = debounced.Invoke();
-                result.Should().Be(1);
-                executionCount.Should().Be(1);
+                result.Should().Be(1, "result after 0.5 seconds");
+                executionCount.Should().Be(1, "executionCount after 0.5 seconds and 2 invocations");
                 await Task.Delay(WAIT_TIME / 2);
 
-                // 1.0s
-                executionCount.Should().Be(1);
+                executionCount.Should().Be(1, "executionCount after 1 seconds and 2 invocation");
                 result = debounced.Invoke();
-                result.Should().Be(1);
-                executionCount.Should().Be(1);
+                result.Should().Be(1, "result after 1 seconds");
+                executionCount.Should().Be(1, "executionCount after 1 seconds and 3 invocations");
                 await Task.Delay(WAIT_TIME / 2);
 
-                // 1.5s
-                executionCount.Should().Be(1);
+                executionCount.Should().Be(1, "executionCount after 1.5 seconds and 3 invocation");
                 result = debounced.Invoke();
-                result.Should().Be(1);
-                executionCount.Should().Be(1);
+                result.Should().Be(1, "result after 1.5 seconds");
+                executionCount.Should().Be(1, "executionCount after 1.5 seconds and 4 invocations");
                 await Task.Delay(WAIT_TIME / 2);
 
-                // 2.0s
-                executionCount.Should().Be(1);
+                executionCount.Should().Be(1, "executionCount after 2 seconds and 4 invocation");
                 result = debounced.Invoke();
-                result.Should().Be(1);
-                executionCount.Should().Be(1);
+                result.Should().Be(1, "result after 2 seconds");
+                executionCount.Should().Be(1, "executionCount after 2 seconds and 5 invocations");
                 await Task.Delay(WAIT_TIME * 3);
 
-                // 5.0s
-                executionCount.Should().Be(2);
+                executionCount.Should().Be(2, "executionCount after 5 seconds and 5 invocation");
                 result = debounced.Invoke();
-                result.Should().Be(3);
-                executionCount.Should().Be(3);
+                result.Should().Be(3, "result after 5 seconds");
+                executionCount.Should().Be(3, "executionCount after 5 seconds and 6 invocations");
             }
 
         }
