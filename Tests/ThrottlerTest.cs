@@ -60,40 +60,35 @@ namespace Tests {
 
             [Fact]
             public async void ThrottleMakesProgressDuringRepeatedInvocations() {
-                Func<int> throttled = Throttler.Throttle(() => ++executionCount, WAIT_TIME, leading: true, trailing: true).Invoke;
+                Func<int> throttled = Throttler.Throttle(() => ++executionCount, WAIT_TIME * 2, leading: true, trailing: true).Invoke;
 
-                // 0.0s
                 int result = throttled();
-                result.Should().Be(1);
-                executionCount.Should().Be(1);
-                await Task.Delay(WAIT_TIME / 2);
-
-                // 0.5s
-                executionCount.Should().Be(1);
-                result = throttled();
-                result.Should().Be(1);
-                executionCount.Should().Be(1);
+                result.Should().Be(1, "result after 0 seconds");
+                executionCount.Should().Be(1, "executionCount after 0 seconds and 1 invocation");
                 await Task.Delay(WAIT_TIME);
 
-                // 1.5s
-                executionCount.Should().Be(2);
+                executionCount.Should().Be(1, "executionCount after 0.1 seconds and 1 invocation");
                 result = throttled();
-                result.Should().Be(2);
-                executionCount.Should().Be(2);
-                await Task.Delay(WAIT_TIME);
+                result.Should().Be(1, "result after 0.1 seconds");
+                executionCount.Should().Be(1, "executionCount after 0.1 seconds and 2 invocation");
+                await Task.Delay(WAIT_TIME * 2);
 
-                // 2.5s
-                executionCount.Should().Be(3);
+                executionCount.Should().Be(2, "executionCount after 0.3 seconds and 2 invocation");
                 result = throttled();
-                result.Should().Be(3);
-                executionCount.Should().Be(3);
-                await Task.Delay(WAIT_TIME);
+                result.Should().Be(2, "result after 0.3 seconds");
+                executionCount.Should().Be(2, "executionCount after 0.3 seconds and 3 invocation");
+                await Task.Delay(WAIT_TIME * 2);
 
-                // 3.5s
-                executionCount.Should().Be(4);
+                executionCount.Should().Be(3, "executionCount after 0.5 seconds and 3 invocation");
                 result = throttled();
-                result.Should().Be(4);
-                executionCount.Should().Be(4);
+                result.Should().Be(3, "result after 0.5 seconds");
+                executionCount.Should().Be(3, "executionCount after 0.5 seconds and 4 invocation");
+                await Task.Delay(WAIT_TIME * 2);
+
+                executionCount.Should().Be(4, "executionCount after 0.7 seconds and 4 invocation");
+                result = throttled();
+                result.Should().Be(4, "result after 0.7 seconds");
+                executionCount.Should().Be(4, "executionCount after 0.7 seconds and 5 invocation");
             }
 
         }
