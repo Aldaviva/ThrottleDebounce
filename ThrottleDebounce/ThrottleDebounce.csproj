@@ -1,19 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;net40</TargetFrameworks>
+        <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
         <LangVersion>latest</LangVersion>
         <PackageId>ThrottleDebounce</PackageId>
         <Authors>Ben Hutchison</Authors>
-        <Company>Blue Jeans Network, Inc.</Company>
+        <Company>Ben Hutchison</Company>
         <Product>ThrottleDebounce</Product>
         <Version>2.0.0-SNAPSHOT</Version>
-        <Description>Rate limit your actions and funcs by throttling and debouncing them.</Description>
-        <Copyright>© 2022 Blue Jeans Network, Inc.</Copyright>
+        <Description>Rate-limit your actions and funcs by throttling and debouncing them. Retry when an exception is thrown.</Description>
+        <Copyright>© 2022 Ben Hutchison</Copyright>
         <PackageProjectUrl>https://github.com/Aldaviva/ThrottleDebounce</PackageProjectUrl>
         <RepositoryUrl>https://github.com/Aldaviva/ThrottleDebounce.git</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <PackageTags>throttle debounce rate limit rate-limit ratelimit</PackageTags>
+        <PackageTags>throttle debounce rate limit rate-limit ratelimit retry</PackageTags>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
         <IncludeSource>True</IncludeSource>
