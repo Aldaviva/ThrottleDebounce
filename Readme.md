@@ -63,7 +63,6 @@ int? result = debouncedFunc.Invoke();
 <a id="understanding-throttling-and-debouncing"></a>
 ### Understanding throttling and debouncing
 
-<a id="summary"></a>
 #### Summary
 Throttling and debouncing both restrict a function to not **execute** too often, no matter how frequently you **invoke** it.
 
@@ -75,25 +74,21 @@ This is useful if the function is invoked very frequently, like whenever the mou
 
 An invocation can result in at most one execution. For example, if both `leading` and `trailing` are `true`, one single invocation will execute once on the leading edge and not on the trailing edge.
 
-<a id="diagram"></a>
 #### Diagram
 
 [![Strategies for Rate-Limiting](https://i.imgur.com/ynlwKtm.png)](https://aldaviva.com/portfolio.html#ratelimiting)
 
-<a id="lodash-documentation"></a>
 #### Lodash documentation
 
 - [`_.throttle()`](https://lodash.com/docs/#throttle)
 - [`_.debounce()`](https://lodash.com/docs/#debounce)
 
-<a id="article-and-demo"></a>
 #### Article and demo
 [*Debouncing and Throttling Explained Through Examples* by David Corbacho](https://css-tricks.com/debouncing-throttling-explained-examples/)
 
 <a id="examples"></a>
 ### Examples
 
-<a id="throttle-an-action-to-execute-at-most-every-1-second"></a>
 #### Throttle an action to execute at most every 1 second
 ```cs
 Action throttled = Throttler.Throttle(() => Console.WriteLine("hi"), TimeSpan.FromSeconds(1)).Invoke;
@@ -104,7 +99,6 @@ Thread.Sleep(1000);
 throttled(); //logs at 2s
 ```
 
-<a id="debounce-a-function-to-execute-after-no-invocations-for-200-milliseconds"></a>
 #### Debounce a function to execute after no invocations for 200 milliseconds
 ```cs
 Func<double, double, double> debounced = Debouncer.Debounce((double x, double y) => Math.Sqrt(x * x + y * y),
@@ -116,7 +110,6 @@ result = debounced(2, 2); //never runs
 result = debounced(3, 4); //runs at 200ms
 ```
 
-<a id="canceling-a-rate-limited-action-so-any-queued-executions-wont-run"></a>
 #### Canceling a rate-limited action so any queued executions won't run
 ```cs
 RateLimitedAction rateLimited = Throttler.Throttle(() => Console.WriteLine("hello"), TimeSpan.FromSeconds(1));
@@ -126,7 +119,6 @@ rateLimited.Dispose();
 rateLimited.Invoke(); //never runs
 ```
 
-<a id="save-a-wpf-windows-position-to-the-registry-at-most-every-1-second"></a>
 #### Save a WPF window's position to the registry at most every 1 second
 ```cs
 static void SaveWindowLocation(double x, double y) => Registry.SetValue(@"HKEY_CURRENT_USER\Software\My Program", 
@@ -138,7 +130,6 @@ Action<double, double> saveWindowLocationThrottled = Throttler.Throttle<double, 
 LocationChanged += (sender, args) => SaveWindowLocationThrottled(Left, Top);
 ```
 
-<a id="prevent-accidental-double-clicks-on-a-wpf-button"></a>
 #### Prevent accidental double-clicks on a WPF button
 ```cs
 public MainWindow(){
