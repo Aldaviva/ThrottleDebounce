@@ -1,4 +1,4 @@
-ThrottleDebounce
+<img src="https://raw.githubusercontent.com/Aldaviva/ThrottleDebounce/master/ThrottleDebounce/icon.jpg" height="23" alt="ThrottleDebounce icon" /> ThrottleDebounce
 ===
 
 [![Nuget](https://img.shields.io/nuget/v/ThrottleDebounce?logo=nuget)](https://www.nuget.org/packages/ThrottleDebounce/) [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/Aldaviva/ThrottleDebounce/.NET?logo=github)](https://github.com/Aldaviva/ThrottleDebounce/actions/workflows/dotnetpackage.yml) [![Coveralls](https://img.shields.io/coveralls/github/Aldaviva/ThrottleDebounce?logo=coveralls)](https://coveralls.io/github/Aldaviva/ThrottleDebounce?branch=master)
@@ -24,10 +24,10 @@ This is a .NET library that lets you rate-limit delegates so they are only execu
 ## Installation
 This package is [available on NuGet Gallery](https://www.nuget.org/packages/ThrottleDebounce/).
 ```powershell
-Install-Package ThrottleDebounce
+dotnet add package ThrottleDebounce
 ```
 ```powershell
-dotnet add package ThrottleDebounce
+Install-Package ThrottleDebounce
 ```
 
 It targets .NET Standard 2.0 and .NET Framework 4.5.2, so it should be compatible with many runtimes.
