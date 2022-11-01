@@ -21,7 +21,7 @@ jobs:
       run: dotnet restore --verbosity normal
 
     - name: Build
-      run: dotnet build ${{ env.ProjectName }} --no-restore --configuration Release
+      run: dotnet build --no-restore --configuration Release
 
       # ensure the test project name is correct (e.g. "Test" vs. "Tests")
     - name: Test
