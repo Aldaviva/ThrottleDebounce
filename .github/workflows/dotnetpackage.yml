@@ -23,7 +23,7 @@ jobs:
     - name: Build
       run: |
         dotnet build ${{ env.ProjectName }} --no-restore --configuration Release
-        dotnet build Tests --no-restore --configuration Release
+        dotnet build Tests --no-dependencies --no-restore --configuration Release
 
       # ensure the test project name is correct (e.g. "Test" vs. "Tests")
     - name: Test
