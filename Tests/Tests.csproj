@@ -12,7 +12,7 @@
         </PackageReference>
         <PackageReference Include="FluentAssertions" Version="6.8.0" />
         <!-- Keep Microsoft.NET.Test.Sdk at 16 so that it can handle the .NET Framework 4 target of the code under test. -->
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
         <PackageReference Include="xunit" Version="2.4.2" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
             <PrivateAssets>all</PrivateAssets>
