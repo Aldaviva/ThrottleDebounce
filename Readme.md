@@ -1,7 +1,7 @@
 <img src="https://raw.githubusercontent.com/Aldaviva/ThrottleDebounce/master/ThrottleDebounce/icon.jpg" height="23" alt="ThrottleDebounce icon" /> ThrottleDebounce
 ===
 
-[![Nuget](https://img.shields.io/nuget/v/ThrottleDebounce?logo=nuget)](https://www.nuget.org/packages/ThrottleDebounce/) [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/Aldaviva/ThrottleDebounce/.NET?logo=github)](https://github.com/Aldaviva/ThrottleDebounce/actions/workflows/dotnetpackage.yml) [![Coveralls](https://img.shields.io/coveralls/github/Aldaviva/ThrottleDebounce?logo=coveralls)](https://coveralls.io/github/Aldaviva/ThrottleDebounce?branch=master)
+[![Nuget](https://img.shields.io/nuget/v/ThrottleDebounce?logo=nuget)](https://www.nuget.org/packages/ThrottleDebounce/) [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Aldaviva/ThrottleDebounce/dotnetpackage.yml?branch=master&logo=github)](https://github.com/Aldaviva/ThrottleDebounce/actions/workflows/dotnetpackage.yml) [![Coveralls](https://img.shields.io/coveralls/github/Aldaviva/ThrottleDebounce?logo=coveralls)](https://coveralls.io/github/Aldaviva/ThrottleDebounce?branch=master)
 
 *Rate-limit your actions and funcs by throttling and debouncing them. Retry when an exception is thrown.*
 
