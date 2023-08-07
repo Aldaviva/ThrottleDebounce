@@ -4,7 +4,7 @@ using System;
 using System.Threading;
 using Timer = System.Timers.Timer;
 
-namespace ThrottleDebounce; 
+namespace ThrottleDebounce;
 
 internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> {
 
@@ -19,6 +19,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     private TResult?  mostRecentResult;
     private bool      disposed;
 
+    /// <exception cref="ArgumentException">if <paramref name="leading"/> and <paramref name="trailing"/> were both <see langword="false"/>, or if <paramref name="maxWait"/> is non-positive</exception>
     internal RateLimiter(Delegate rateLimitedCallback, TimeSpan wait, bool leading, bool trailing, TimeSpan maxWait = default) {
         if (!leading && !trailing) {
             throw new ArgumentException("One or both of the leading and trailing arguments must be true, but both were false.");
