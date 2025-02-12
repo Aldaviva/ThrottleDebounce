@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/Aldaviva/ThrottleDebounce/master/ThrottleDebounce/icon.jpg" height="23" alt="ThrottleDebounce icon" /> ThrottleDebounce
+ThrottleDebounce
 ===
 
 [![Package Version](https://img.shields.io/nuget/v/ThrottleDebounce?logo=nuget&label=version)](https://www.nuget.org/packages/ThrottleDebounce/) [![NuGet Gallery Download Count](https://img.shields.io/nuget/dt/ThrottleDebounce?logo=nuget&color=blue
@@ -8,7 +8,7 @@
 
 This is a .NET library that lets you rate-limit delegates so they are only executed at most once in a given interval, even if they are invoked multiple times in that interval. You can also invoke a delegate and automatically retry it if it fails.
 
-<!-- MarkdownTOC autolink="true" bracket="round" autoanchor="true" levels="1,2,3" -->
+<!-- MarkdownTOC autolink="true" bracket="round" autoanchor="false" levels="1,2,3" -->
 
 - [Installation](#installation)
 - [Rate limiting](#rate-limiting)
@@ -21,7 +21,6 @@ This is a .NET library that lets you rate-limit delegates so they are only execu
 
 <!-- /MarkdownTOC -->
 
-<a id="installation"></a>
 ## Installation
 This package is [available on NuGet Gallery](https://www.nuget.org/packages/ThrottleDebounce/).
 ```powershell
@@ -33,10 +32,8 @@ Install-Package ThrottleDebounce
 
 It targets [.NET Standard 2.0](https://learn.microsoft.com/en-us/dotnet/standard/net-standard?tabs=net-standard-2-0) and .NET Framework 4.5.2, so it should be compatible with many runtimes.
 
-<a id="rate-limiting"></a>
 ## Rate limiting
 
-<a id="usage"></a>
 ### Usage
 
 ```cs
@@ -61,7 +58,6 @@ int? result = debouncedFunc.Invoke();
 1. Your delegate will be executed at the desired rate.
 1. Optionally call the `RateLimitedAction`/`RateLimitedFunc` object's `Dispose()` method to prevent all queued executions from running when you are done.
 
-<a id="understanding-throttling-and-debouncing"></a>
 ### Understanding throttling and debouncing
 
 #### Summary
@@ -89,7 +85,6 @@ Not all extra invocations are queued to run on the trailing edge &mdash; only th
 #### Article and demo
 [*Debouncing and Throttling Explained Through Examples* by David Corbacho](https://css-tricks.com/debouncing-throttling-explained-examples/)
 
-<a id="examples"></a>
 ### Examples
 
 #### Throttle an action to execute at most every 1 second
@@ -149,12 +144,10 @@ private void OnButtonClick(object sender, RoutedEventArgs e) {
 }
 ```
 
-<a id="retrying"></a>
 ## Retrying
 
 Given a function or action, you can execute it and, if it threw an exception, automatically execute it again until it succeeds.
 
-<a id="usage-1"></a>
 ### Usage
 ```cs
 Retrier.Attempt(attempt => MyErrorProneAction(), maxAttempts: 2);
@@ -169,7 +162,6 @@ Retrier.Attempt(attempt => MyErrorProneAction(), maxAttempts: 2);
     1. **`CancellationToken cancellationToken`** — used to cancel the attempts and delays before they have all completed. Optional, defaults to no cancellation token. When cancelled, `Attempt` throws a `TaskCancelledException`.
 1. If your delegate returns a value, it will be returned by `Attempt`.
 
-<a id="example"></a>
 ### Example
 
 #### Send at most 5 HTTP requests, 2 seconds apart, until a 200 response is received
