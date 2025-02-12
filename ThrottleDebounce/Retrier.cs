@@ -181,7 +181,10 @@ public static class Retrier {
         null                                        => null
     };
 
-    public readonly struct Delays {
+    /// <summary>
+    /// Built-in implementations of different backoff strategies, which can be passed to the <c>beforeRetry</c> parameter of <c>Retrier.Attempt</c>.
+    /// </summary>
+    public static class Delays {
 
         private static TimeSpan Clip(Func<TimeSpan> calculateDelay, TimeSpan limit) {
             try {
@@ -193,6 +196,8 @@ public static class Retrier {
         }
 
         public static Func<int, TimeSpan> Constant(TimeSpan delay) => _ => delay;
+
+        public static Func<int, TimeSpan> Constant(int delayMilliseconds) => Constant(TimeSpan.FromMilliseconds(delayMilliseconds));
 
         public static Func<int, TimeSpan> Linear(TimeSpan coefficient, TimeSpan initial = default, TimeSpan limit = default) => attempt => Clip(() => {
             checked {
