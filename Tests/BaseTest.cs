@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace Tests; 
+namespace Tests;
 
 public abstract class BaseTest {
 
-    protected static readonly TimeSpan WAIT_TIME = TimeSpan.FromMilliseconds(200);
+    protected static readonly TimeSpan WAIT_TIME = TimeSpan.FromMilliseconds(500);
 
     protected int executionCount     = 0;
     protected int mostRecentArgument = -1;

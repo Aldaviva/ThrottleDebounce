@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Linq;
 
-namespace OverloadGenerator; 
+namespace OverloadGenerator;
 
 internal static class OverloadGeneratorMain {
 
     private const int MAX_TYPE_PARAMS = 16;
 
     private static void Main() {
-        Console.WriteLine(generateBuilderMethods(false));
-        Console.WriteLine(generateBuilderMethods(true));
-        Console.WriteLine(generateInterfaces());
+        // Console.WriteLine(generateBuilderMethods(false));
+        // Console.WriteLine(generateBuilderMethods(true));
+        // Console.WriteLine(generateInterfaces());
         Console.WriteLine(generateImplementationMethods());
-        Console.WriteLine(generateTests());
+        // Console.WriteLine(generateTests());
     }
 
     private static string generateInterfaces() {
@@ -53,12 +53,11 @@ internal static class OverloadGeneratorMain {
     private static string generateImplementationMethods() {
         string actions = string.Join("\n\n", Enumerable.Range(1, MAX_TYPE_PARAMS)
             .Select(paramCount =>
-                $"void RateLimitedAction<{joinNumbers(paramCount)}>.Invoke({joinNumbers(paramCount, i => $"T{i} arg{i}")}) => OnUserInvocation(new object[]{{ {joinNumbers(paramCount, "arg", suffix: "!")} }});"));
+                $"void RateLimitedAction<{joinNumbers(paramCount)}>.Invoke({joinNumbers(paramCount, i => $"T{i} arg{i}")}) {{\n    object[] parameters = parameterArrayPool.Borrow();\n    {joinNumbers(paramCount, i => $"parameters[{i - 1}] = arg{i}!;", "\n    ")} \n    OnUserInvocation(parameters);\n}}"));
 
         string funcs = string.Join("\n\n", Enumerable.Range(1, MAX_TYPE_PARAMS)
             .Select(paramCount =>
-                $"TResult? RateLimitedFunc<{joinNumbers(paramCount)}, TResult>.Invoke({joinNumbers(paramCount, i => $"T{i} arg{i}")}) => OnUserInvocation(new object[]{{ {joinNumbers(paramCount, "arg", suffix: "!")} }});"));
-        // $"Func<{joinNumbers(i)}, TResult> RateLimitedFunc<{joinNumbers(i)}, TResult>.RateLimitedFunc => ({joinNumbers(i, "arg")}) => OnUserInvocation(new object[]{{ {joinNumbers(i, "arg", suffix: "!")} }});"));
+                $"TResult? RateLimitedFunc<{joinNumbers(paramCount)}, TResult>.Invoke({joinNumbers(paramCount, i => $"T{i} arg{i}")}) {{\n    object[] parameters = parameterArrayPool.Borrow();\n    {joinNumbers(paramCount, i => $"parameters[{i - 1}] = arg{i}!;", "\n    ")} \n    return OnUserInvocation(parameters);\n}}"));
 
         return actions + "\n\n" + funcs;
     }

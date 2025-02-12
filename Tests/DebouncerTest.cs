@@ -1,10 +1,10 @@
-﻿using System;
+﻿using FluentAssertions;
+using System;
 using System.Threading.Tasks;
-using FluentAssertions;
 using ThrottleDebounce;
 using Xunit;
 
-namespace Tests; 
+namespace Tests;
 
 public class DebouncerTest: BaseTest {
 
@@ -34,7 +34,7 @@ public class DebouncerTest: BaseTest {
     public class DebounceActionLeadingAndTrailingClass: DebouncerTest {
 
         [Fact]
-        public async void DebounceActionLeadingAndTrailing() {
+        public async Task DebounceActionLeadingAndTrailing() {
             Func<int> debounced = Debouncer.Debounce(() => ++executionCount, WAIT_TIME, leading: true, trailing: true).Invoke;
 
             int result = debounced();
@@ -59,7 +59,7 @@ public class DebouncerTest: BaseTest {
     public class DebounceMakesProgressDuringRepeatedInvocationsClass: DebouncerTest {
 
         [Fact]
-        public async void DebounceMakesProgressDuringRepeatedInvocations() {
+        public async Task DebounceMakesProgressDuringRepeatedInvocations() {
             Func<int> debounced = Debouncer.Debounce(() => ++executionCount, WAIT_TIME * 2, leading: true, trailing: true).Invoke;
 
             int result = debounced();
@@ -102,7 +102,7 @@ public class DebouncerTest: BaseTest {
     public class DebounceActionLeadingOnlyClass: DebouncerTest {
 
         [Fact]
-        public async void DebounceActionLeadingOnly() {
+        public async Task DebounceActionLeadingOnly() {
             Func<int> debounced = Debouncer.Debounce(() => ++executionCount, WAIT_TIME, leading: true, trailing: false).Invoke;
 
             int result = debounced.Invoke();
@@ -127,7 +127,7 @@ public class DebouncerTest: BaseTest {
     public class DebounceActionTrailingOnlyClass: DebouncerTest {
 
         [Fact]
-        public async void DebounceActionTrailingOnly() {
+        public async Task DebounceActionTrailingOnly() {
             Func<int> debounced = Debouncer.Debounce(() => ++executionCount, WAIT_TIME, leading: false, trailing: true).Invoke;
 
             int result = debounced.Invoke();
@@ -152,7 +152,7 @@ public class DebouncerTest: BaseTest {
     public class DisposingPreventsLaterExecutionsClass: ThrottlerTest {
 
         [Fact]
-        public async void DisposingPreventsLaterExecutions() {
+        public async Task DisposingPreventsLaterExecutions() {
             RateLimitedFunc<int> rateLimited = Debouncer.Debounce(() => ++executionCount, WAIT_TIME, leading: true, trailing: true);
             Func<int>            debounced   = rateLimited.Invoke;
 

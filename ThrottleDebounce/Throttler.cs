@@ -1,8 +1,10 @@
 ﻿using System;
 
-namespace ThrottleDebounce; 
+namespace ThrottleDebounce;
 
 public static class Throttler {
+
+    internal static readonly object[] NO_PARAMS = [];
 
     public static RateLimitedAction Throttle(Action action, TimeSpan wait, bool leading = true, bool trailing = true) {
         return new RateLimiter<object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object>(action, wait, leading,
@@ -36,12 +38,12 @@ public static class Throttler {
     }
 
     public static RateLimitedAction<T1, T2, T3, T4, T5, T6, T7> Throttle<T1, T2, T3, T4, T5, T6, T7>(Action<T1, T2, T3, T4, T5, T6, T7> action, TimeSpan wait, bool leading = true,
-                                                                                                     bool                               trailing = true) {
+                                                                                                     bool trailing = true) {
         return new RateLimiter<T1, T2, T3, T4, T5, T6, T7, object, object, object, object, object, object, object, object, object, object>(action, wait, leading, trailing, wait);
     }
 
     public static RateLimitedAction<T1, T2, T3, T4, T5, T6, T7, T8> Throttle<T1, T2, T3, T4, T5, T6, T7, T8>(Action<T1, T2, T3, T4, T5, T6, T7, T8> action, TimeSpan wait, bool leading = true,
-                                                                                                             bool                                   trailing = true) {
+                                                                                                             bool trailing = true) {
         return new RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, object, object, object, object, object, object, object, object, object>(action, wait, leading, trailing, wait);
     }
 
@@ -109,12 +111,12 @@ public static class Throttler {
     }
 
     public static RateLimitedFunc<T1, T2, T3, T4, T5, TResult> Throttle<T1, T2, T3, T4, T5, TResult>(Func<T1, T2, T3, T4, T5, TResult> func, TimeSpan wait, bool leading = true,
-                                                                                                     bool                              trailing = true) {
+                                                                                                     bool trailing = true) {
         return new RateLimiter<T1, T2, T3, T4, T5, object, object, object, object, object, object, object, object, object, object, object, TResult>(func, wait, leading, trailing, wait);
     }
 
     public static RateLimitedFunc<T1, T2, T3, T4, T5, T6, TResult> Throttle<T1, T2, T3, T4, T5, T6, TResult>(Func<T1, T2, T3, T4, T5, T6, TResult> func, TimeSpan wait, bool leading = true,
-                                                                                                             bool                                  trailing = true) {
+                                                                                                             bool trailing = true) {
         return new RateLimiter<T1, T2, T3, T4, T5, T6, object, object, object, object, object, object, object, object, object, object, TResult>(func, wait, leading, trailing, wait);
     }
 
