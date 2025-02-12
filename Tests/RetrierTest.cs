@@ -1,7 +1,7 @@
-﻿using System;
+﻿using FluentAssertions;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentAssertions;
 using ThrottleDebounce;
 using Xunit;
 
@@ -173,16 +173,19 @@ public class RetrierTest {
 
     [Fact]
     public async Task AsyncFuncTCancellation() {
-        Failer                  failer = new();
-        CancellationTokenSource cts    = new();
-        Func<Task<int>> thrower = () => Retrier.Attempt(attempt => {
-            if (attempt >= 4) {
-                cts.Cancel();
-            }
+        Failer                  failer      = new();
+        CancellationTokenSource cts         = new();
+        int                     maxAttempts = 10;
+        Func<Task<int>> thrower = () => {
+            return Retrier.Attempt(attempt => {
+                if (attempt >= 4) {
+                    cts.Cancel();
+                }
 
-            failer.InvokeAction();
-            return Task.FromResult(-1); // never returns because failer always throws
-        }, 10, cancellationToken: cts.Token);
+                failer.InvokeAction();
+                return Task.FromResult(-1); // never returns because failer always throws
+            }, maxAttempts, cancellationToken: cts.Token);
+        };
 
         await thrower.Should().ThrowAsync<TaskCanceledException>();
         failer.InvocationCount.Should().Be(5);
@@ -205,7 +208,86 @@ public class RetrierTest {
         failer.InvocationCount.Should().Be(5);
     }
 
-    private class Failure: Exception { }
+    [Fact]
+    public void OnBeforeRetry() {
+        Failer     failer          = new(1);
+        int?       delayAttempt    = null;
+        int?       onBeforeAttempt = null;
+        Exception? exception       = null;
+
+        Retrier.Attempt(_ => failer.InvokeAction(),
+            delay: a => {
+                delayAttempt = a;
+                return TimeSpan.Zero;
+            }, beforeRetry: (a, e) => {
+                onBeforeAttempt = a;
+                exception       = e;
+            });
+
+        delayAttempt.Should().Be(0);
+        onBeforeAttempt.Should().Be(0);
+        exception.Should().BeOfType<Failure>();
+    }
+
+    [Theory]
+    [InlineData(0, 8000)]
+    [InlineData(1, 8000)]
+    [InlineData(2, 8000)]
+    [InlineData(3, 8000)]
+    public void ConstantDelay(int afterAttempt, int expectedMillis) {
+        Func<int, TimeSpan> delay = Retrier.Delays.Constant(TimeSpan.FromSeconds(8));
+        delay(afterAttempt).TotalMilliseconds.Should().BeApproximately(expectedMillis, 2);
+    }
+
+    [Theory]
+    [InlineData(0, 1000)]
+    [InlineData(1, 2000)]
+    [InlineData(2, 3000)]
+    [InlineData(3, 3000)]
+    public void LinearDelay(int afterAttempt, int expectedMillis) {
+        Func<int, TimeSpan> delay = Retrier.Delays.Linear(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(3));
+        delay(afterAttempt).TotalMilliseconds.Should().BeApproximately(expectedMillis, 2);
+    }
+
+    [Theory]
+    [InlineData(0, 0)]
+    [InlineData(1, 1000)]
+    [InlineData(2, 4000)]
+    [InlineData(3, 9000)]
+    public void ExponentialDelay(int afterAttempt, int expectedMillis) {
+        Func<int, TimeSpan> delay = Retrier.Delays.Exponential(TimeSpan.FromSeconds(1));
+        delay(afterAttempt).TotalMilliseconds.Should().BeApproximately(expectedMillis, 2);
+    }
+
+    [Theory]
+    [InlineData(0, 0000)]
+    [InlineData(1, 2000)]
+    [InlineData(2, 4000)]
+    [InlineData(3, 8000)]
+    public void PowerDelay(int afterAttempt, int expectedMillis) {
+        Func<int, TimeSpan> delay = Retrier.Delays.Power(TimeSpan.FromSeconds(1));
+        delay(afterAttempt).TotalMilliseconds.Should().BeApproximately(expectedMillis, 2);
+    }
+
+    [Theory]
+    [InlineData(0, 0000)]
+    [InlineData(1, 1000)]
+    [InlineData(2, 1301)]
+    [InlineData(3, 1477)]
+    public void LogDelay(int afterAttempt, int expectedMillis) {
+        Func<int, TimeSpan> delay = Retrier.Delays.Logarithm(TimeSpan.FromSeconds(1));
+        delay(afterAttempt).TotalMilliseconds.Should().BeApproximately(expectedMillis, 2);
+    }
+
+    [Fact]
+    public void RandomDelay() {
+        Func<int, TimeSpan> delay = Retrier.Delays.MonteCarlo(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(1));
+        for (int attempt = 0; attempt < 10; attempt++) {
+            delay(attempt).TotalMilliseconds.Should().BeInRange(1000, 10_000);
+        }
+    }
+
+    private class Failure: Exception;
 
     private class Failer {
 
