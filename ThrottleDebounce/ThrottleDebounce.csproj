@@ -16,7 +16,7 @@
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <PackageTags>throttle debounce rate limit rate-limit ratelimit retry</PackageTags>
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
-        <IncludeSource>True</IncludeSource>
+        <IncludeSource>true</IncludeSource>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -26,8 +26,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="icon.jpg" Pack="true" PackagePath="\" />
-        <None Include="..\Readme.md" Pack="true" PackagePath="\" />
+        <None Include="icon.jpg;..\Readme.md" Pack="true" PackagePath="\" />
+        <None Include="..\.github*\**" />
     </ItemGroup>
     
     <ItemGroup>

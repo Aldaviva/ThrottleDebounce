@@ -15,33 +15,45 @@ jobs:
 
     steps:
     - name: Clone
-      uses: actions/checkout@v3
-        
+      uses: actions/checkout@v4
+
+    - name: Initialize test reporting
+      uses: testspace-com/setup-testspace@v1
+      with:
+        domain: ${{ github.repository_owner }}
+
     - name: Restore
-      run: dotnet restore --verbosity normal
+      run: dotnet restore ${{ env.ProjectName }} --verbosity normal
 
     - name: Build
-      run: |
-        dotnet build ${{ env.ProjectName }} --no-restore --configuration Release
-        dotnet build Tests --no-dependencies --no-restore --configuration Release
-
-      # ensure the test project name is correct (e.g. "Test" vs. "Tests")
-    - name: Test
-      run: |
-        dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --settings Tests/coverlet.runsettings
-        mv Tests/TestResults/*/coverage.info Tests/TestResults
+      run: dotnet build ${{ env.ProjectName }} --no-restore --configuration Release
 
     - name: Pack
       run: dotnet pack ${{ env.ProjectName }} --no-build --configuration Release
 
+    - name: Test
+      run: |
+        dotnet test Tests --configuration Release --collect:"XPlat Code Coverage" --settings Tests/coverlet.runsettings --logger "trx;LogFileName=TestResults.xml" --verbosity normal
+        Out-File -InputObject "TEST_EXIT_CODE=$LASTEXITCODE" -FilePath $env:GITHUB_ENV -Append -Encoding UTF8
+        Copy-Item Tests/TestResults/*/coverage.info Tests/TestResults -ErrorAction Continue
+        exit 0
+
+    - name: Upload test report
+      run: testspace Tests/TestResults/*.xml
+
+    - name: Upload coverage
+      uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        files: Tests/TestResults/coverage.info
+        format: lcov
+
+    - name: Stop if tests failed
+      run: exit $env:TEST_EXIT_CODE
+
     - name: Upload package
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.ProjectName }}.nupkg
         path: ${{ env.ProjectName }}/bin/Release/*.*nupkg
-
-    - name: Upload coverage
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: Tests/TestResults/coverage.info
+        if-no-files-found: error

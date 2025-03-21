@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using ThrottleDebounce;
 
 // ReSharper disable RedundantAssignment
