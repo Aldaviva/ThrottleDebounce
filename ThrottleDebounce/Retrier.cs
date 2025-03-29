@@ -19,8 +19,8 @@ public static class Retrier {
     /// Run the given <paramref name="action"/> at most <paramref name="maxAttempts"/> times, until it returns without throwing an exception.
     /// </summary>
     /// <param name="action">An action which is prone to sometimes throw exceptions. The <see cref="int"/> argument is the number of attempts, starting from <c>0</c> for the initial attempt.</param>
-    /// <param name="maxAttempts">The total number of times <paramref name="action"/> is allowed to run in this invocation, equal to <c>1</c> initial attempt plus up to <c>maxAttempts - 1</c> retries if it throws an exception. Must be at least 1, if you pass 0 it will clip to 1. Defaults to 2. For infinite retries, pass <see langword="null"/>.</param>
-    /// <param name="delay">How long to wait between attempts. Defaults to <see langword="null"/>, which means no delay. This is a function of how many retries have been attempted (starting from <c>0</c>), to allow for strategies such as exponential back-off. Return values outside the range <c>[0, int.MaxValue]</c> ms will be clipped (<c>[0, uint.MaxValue-1]</c> ms starting in .NET 6).</param>
+    /// <param name="maxAttempts">The total number of times <paramref name="action"/> is allowed to run in this invocation, equal to <c>1</c> initial attempt plus up to <c>maxAttempts - 1</c> retries if it throws an exception. Must be at least 1, if you pass 0 it will clip to 1. Defaults to 2. For infinite retries, pass <c>null</c>.</param>
+    /// <param name="delay">How long to wait between attempts. Defaults to <c>null</c>, which means no delay. This is a function of how many retries have been attempted (starting from <c>0</c>), to allow for strategies such as exponential back-off. Return values outside the range <c>[0, int.MaxValue]</c> ms will be clipped (<c>[0, uint.MaxValue-1]</c> ms starting in .NET 6).</param>
     /// <param name="isRetryAllowed">Allows certain exceptions that indicate permanent failures to not trigger retries. For example, <see cref="ArgumentOutOfRangeException"/> will usually be thrown every time you call a function with the same arguments, so there is no reason to retry, and <paramref name="isRetryAllowed"/> could return <c>false</c> in that case. Defaults to retrying on every exception besides <see cref="OutOfMemoryException"/>.</param>
     /// <param name="beforeRetry">Action to run between attempts, possibly to clean up some state before the next retry. For example, you may want to disconnect a failed connection before reconnecting. Runs after any <paramref name="delay"/>. Defaults to no action. Takes as parameters the number of retries attempted (starting from <c>0</c>) and the most recent <see cref="Exception"/> thrown.</param>
     /// <param name="cancellationToken">Allows you to cancel remaining attempts and delays.</param>
@@ -60,8 +60,8 @@ public static class Retrier {
     /// Run the given <paramref name="func"/> at most <paramref name="maxAttempts"/> times, until it returns without throwing an exception.
     /// </summary>
     /// <param name="func">An action which is prone to sometimes throw exceptions. The <see cref="int"/> argument is the number of attempts, starting from <c>0</c> for the initial attempt.</param>
-    /// <param name="maxAttempts">The total number of times <paramref name="func"/> is allowed to run in this invocation, equal to <c>1</c> initial attempt plus up to <c>maxAttempts - 1</c> retries if it throws an exception. Must be at least 1, if you pass 0 it will clip to 1. Defaults to 2. For infinite retries, pass <see langword="null"/>.</param>
-    /// <param name="delay">How long to wait between attempts. Defaults to <see langword="null"/>, which means no delay. This is a function of how many retries have been attempted (starting from <c>0</c>), to allow for strategies such as exponential back-off. Return values outside the range <c>[0, int.MaxValue]</c> ms will be clipped (<c>[0, uint.MaxValue-1]</c> ms starting in .NET 6).</param>
+    /// <param name="maxAttempts">The total number of times <paramref name="func"/> is allowed to run in this invocation, equal to <c>1</c> initial attempt plus up to <c>maxAttempts - 1</c> retries if it throws an exception. Must be at least 1, if you pass 0 it will clip to 1. Defaults to 2. For infinite retries, pass <c>null</c>.</param>
+    /// <param name="delay">How long to wait between attempts. Defaults to <c>null</c>, which means no delay. This is a function of how many retries have been attempted (starting from <c>0</c>), to allow for strategies such as exponential back-off. Return values outside the range <c>[0, int.MaxValue]</c> ms will be clipped (<c>[0, uint.MaxValue-1]</c> ms starting in .NET 6).</param>
     /// <param name="isRetryAllowed">Allows certain exceptions that indicate permanent failures to not trigger retries. For example, <see cref="ArgumentOutOfRangeException"/> will usually be thrown every time you call a function with the same arguments, so there is no reason to retry, and <paramref name="isRetryAllowed"/> could return <c>false</c> in that case. Defaults to retrying on every exception besides <see cref="OutOfMemoryException"/>.</param>
     /// <param name="beforeRetry">Action to run between attempts, possibly to clean up some state before the next retry. For example, you may want to disconnect a failed connection before reconnecting. Runs after any <paramref name="delay"/>. Defaults to no action. Takes as parameters the number of retries attempted (starting from <c>0</c>) and the most recent <see cref="Exception"/> thrown.</param>
     /// <param name="cancellationToken">Allows you to cancel remaining attempts and delays.</param>
@@ -99,8 +99,8 @@ public static class Retrier {
     /// Run the given <paramref name="func"/> at most <paramref name="maxAttempts"/> times, until it returns without throwing an exception.
     /// </summary>
     /// <param name="func">An action which is prone to sometimes throw exceptions. The <see cref="int"/> argument is the number of attempts, starting from <c>0</c> for the initial attempt.</param>
-    /// <param name="maxAttempts">The total number of times <paramref name="func"/> is allowed to run in this invocation, equal to <c>1</c> initial attempt plus up to <c>maxAttempts - 1</c> retries if it throws an exception. Must be at least 1, if you pass 0 it will clip to 1. Defaults to 2. For infinite retries, pass <see langword="null"/>.</param>
-    /// <param name="delay">How long to wait between attempts. Defaults to <see langword="null"/>, which means no delay. This is a function of how many retries have been attempted (starting from <c>0</c>), to allow for strategies such as exponential back-off. Return values outside the range <c>[0, int.MaxValue]</c> ms will be clipped (<c>[0, uint.MaxValue-1]</c> ms starting in .NET 6).</param>
+    /// <param name="maxAttempts">The total number of times <paramref name="func"/> is allowed to run in this invocation, equal to <c>1</c> initial attempt plus up to <c>maxAttempts - 1</c> retries if it throws an exception. Must be at least 1, if you pass 0 it will clip to 1. Defaults to 2. For infinite retries, pass <c>null</c>.</param>
+    /// <param name="delay">How long to wait between attempts. Defaults to <c>null</c>, which means no delay. This is a function of how many retries have been attempted (starting from <c>0</c>), to allow for strategies such as exponential back-off. Return values outside the range <c>[0, int.MaxValue]</c> ms will be clipped (<c>[0, uint.MaxValue-1]</c> ms starting in .NET 6).</param>
     /// <param name="isRetryAllowed">Allows certain exceptions that indicate permanent failures to not trigger retries. For example, <see cref="ArgumentOutOfRangeException"/> will usually be thrown every time you call a function with the same arguments, so there is no reason to retry, and <paramref name="isRetryAllowed"/> could return <c>false</c> in that case. Defaults to retrying on every exception besides <see cref="OutOfMemoryException"/>.</param>
     /// <param name="beforeRetry">Action to run between attempts, possibly to clean up some state before the next retry. For example, you may want to disconnect a failed connection before reconnecting. Runs after any <paramref name="delay"/>. Defaults to no action. Takes as parameters the number of retries attempted (starting from <c>0</c>) and the most recent <see cref="Exception"/> thrown.</param>
     /// <param name="cancellationToken">Allows you to cancel remaining attempts and delays.</param>
@@ -139,8 +139,8 @@ public static class Retrier {
     /// Run the given <paramref name="func"/> at most <paramref name="maxAttempts"/> times, until it returns without throwing an exception.
     /// </summary>
     /// <param name="func">An action which is prone to sometimes throw exceptions. The <see cref="int"/> argument is the number of attempts, starting from <c>0</c> for the initial attempt.</param>
-    /// <param name="maxAttempts">The total number of times <paramref name="func"/> is allowed to run in this invocation, equal to <c>1</c> initial attempt plus up to <c>maxAttempts - 1</c> retries if it throws an exception. Must be at least 1, if you pass 0 it will clip to 1. Defaults to 2. For infinite retries, pass <see langword="null"/>.</param>
-    /// <param name="delay">How long to wait between attempts. Defaults to <see langword="null"/>, which means no delay. This is a function of how many retries have been attempted (starting from <c>0</c>), to allow for strategies such as exponential back-off. Return values outside the range <c>[0, int.MaxValue]</c> ms will be clipped (<c>[0, uint.MaxValue-1]</c> ms starting in .NET 6).</param>
+    /// <param name="maxAttempts">The total number of times <paramref name="func"/> is allowed to run in this invocation, equal to <c>1</c> initial attempt plus up to <c>maxAttempts - 1</c> retries if it throws an exception. Must be at least 1, if you pass 0 it will clip to 1. Defaults to 2. For infinite retries, pass <c>null</c>.</param>
+    /// <param name="delay">How long to wait between attempts. Defaults to <c>null</c>, which means no delay. This is a function of how many retries have been attempted (starting from <c>0</c>), to allow for strategies such as exponential back-off. Return values outside the range <c>[0, int.MaxValue]</c> ms will be clipped (<c>[0, uint.MaxValue-1]</c> ms starting in .NET 6).</param>
     /// <param name="isRetryAllowed">Allows certain exceptions that indicate permanent failures to not trigger retries. For example, <see cref="ArgumentOutOfRangeException"/> will usually be thrown every time you call a function with the same arguments, so there is no reason to retry, and <paramref name="isRetryAllowed"/> could return <c>false</c> in that case. Defaults to retrying on every exception besides <see cref="OutOfMemoryException"/>.</param>
     /// <param name="beforeRetry">Action to run between attempts, possibly to clean up some state before the next retry. For example, you may want to disconnect a failed connection before reconnecting. Runs after any <paramref name="delay"/>. Defaults to no action. Takes as parameters the number of retries attempted (starting from <c>0</c>) and the most recent <see cref="Exception"/> thrown.</param>
     /// <param name="cancellationToken">Allows you to cancel remaining attempts and delays.</param>
@@ -182,52 +182,95 @@ public static class Retrier {
     };
 
     /// <summary>
-    /// Built-in implementations of different backoff strategies, which can be passed to the <c>beforeRetry</c> parameter of <c>Retrier.Attempt</c>.
+    /// Built-in implementations of different backoff strategies, which can be passed to the <c>delay</c> parameter of <c>Retrier.Attempt</c>.
     /// </summary>
     public static class Delays {
 
-        private static TimeSpan Clip(Func<TimeSpan> calculateDelay, TimeSpan limit) {
+        private static TimeSpan Clip(Func<TimeSpan> calculateDelay, TimeSpan max) {
             try {
                 TimeSpan delay = calculateDelay();
-                return limit != TimeSpan.Zero && delay > limit ? limit : delay;
+                return delay < TimeSpan.Zero ? TimeSpan.Zero : max != TimeSpan.Zero && delay > max ? max : delay;
             } catch (OverflowException) {
-                return limit != TimeSpan.Zero ? limit : TimeSpan.MaxValue;
+                return max != TimeSpan.Zero ? max : TimeSpan.MaxValue;
             }
         }
 
+        /// <summary>
+        /// Always wait a fixed duration before each retry
+        /// </summary>
+        /// <param name="delay">How long to wait before the next retry</param>
+        /// <returns>A function that can be passed to the <c>delay</c> parameter of <c>Retrier.Attempt</c></returns>
         public static Func<int, TimeSpan> Constant(TimeSpan delay) => _ => delay;
 
+        /// <inheritdoc cref="Constant(System.TimeSpan)" />
         public static Func<int, TimeSpan> Constant(int delayMilliseconds) => Constant(TimeSpan.FromMilliseconds(delayMilliseconds));
 
-        public static Func<int, TimeSpan> Linear(TimeSpan coefficient, TimeSpan initial = default, TimeSpan limit = default) => attempt => Clip(() => {
+        /// <summary>
+        /// Wait a linearly-increasing duration before each retry (<c>y = mx + b</c>)
+        /// </summary>
+        /// <param name="coefficient">A duration to multiply by the next retry's number to get a duration for this retry delay (<c>m</c>)</param>
+        /// <param name="initial">A base duration to add (<c>b</c>)</param>
+        /// <param name="max">An upper limit above which the duration will not increase (the line becomes horizontal at this y-position)</param>
+        /// <returns>A function that can be passed to the <c>delay</c> parameter of <c>Retrier.Attempt</c></returns>
+        public static Func<int, TimeSpan> Linear(TimeSpan coefficient, TimeSpan initial = default, TimeSpan max = default) => retry => Clip(() => {
             checked {
-                long ticks = coefficient.Ticks * attempt;
+                long ticks = coefficient.Ticks * retry;
                 return new TimeSpan(ticks) + initial;
             }
-        }, limit);
+        }, max);
 
-        public static Func<int, TimeSpan> Exponential(TimeSpan coefficient, double power = 2, TimeSpan initial = default, TimeSpan limit = default) => attempt => Clip(() => {
+        /// <summary>
+        /// Wait an exponentially-increasing duration before each retry (<c>y = m(x)^n + b</c>)
+        /// </summary>
+        /// <param name="coefficient">A duration to multiply by the exponential value to get a duration for this retry delay (<c>m</c>)</param>
+        /// <param name="power">The power to which the retry number will be raised. Defaults to <c>2</c> to square it.</param>
+        /// <param name="initial">A base duration to add (<c>b</c>)</param>
+        /// <param name="max">An upper limit above which the duration will not increase (the line becomes horizontal at this y-position)</param>
+        /// <returns>A function that can be passed to the <c>delay</c> parameter of <c>Retrier.Attempt</c></returns>
+        public static Func<int, TimeSpan> Exponential(TimeSpan coefficient, double power = 2, TimeSpan initial = default, TimeSpan max = default) => retry => Clip(() => {
             checked {
-                long ticks = (long) (coefficient.Ticks * Math.Pow(attempt, power));
+                long ticks = (long) (coefficient.Ticks * Math.Pow(retry, power));
                 return new TimeSpan(ticks) + initial;
             }
-        }, limit);
+        }, max);
 
-        public static Func<int, TimeSpan> Power(TimeSpan coefficient, double @base = 2, TimeSpan initial = default, TimeSpan limit = default) => attempt => Clip(() => {
+        /// <summary>
+        /// Wait a duration at increases with a power series before each retry (<c>y = m(n)^x + b</c>)
+        /// </summary>
+        /// <param name="coefficient">A duration to multiply by the exponential value to get a duration for this retry delay (<c>m</c>)</param>
+        /// <param name="base">A number to raise to the power of the number of retries that have already been attempted. Defaults to <c>2</c> for a <c>2^x</c> power series.</param>
+        /// <param name="initial">A base duration to add (<c>b</c>)</param>
+        /// <param name="max">An upper limit above which the duration will not increase (the line becomes horizontal at this y-position)</param>
+        /// <returns>A function that can be passed to the <c>delay</c> parameter of <c>Retrier.Attempt</c></returns>
+        public static Func<int, TimeSpan> Power(TimeSpan coefficient, double @base = 2, TimeSpan initial = default, TimeSpan max = default) => retry => Clip(() => {
             checked {
-                long ticks = attempt == 0 ? 0 : (long) (coefficient.Ticks * Math.Pow(@base, attempt));
+                long ticks = retry == 0 ? 0 : (long) (coefficient.Ticks * Math.Pow(@base, retry));
                 return new TimeSpan(ticks) + initial;
             }
-        }, limit);
+        }, max);
 
-        public static Func<int, TimeSpan> Logarithm(TimeSpan coefficient, double @base = 10, TimeSpan initial = default, TimeSpan limit = default) => attempt => Clip(() => {
+        /// <summary>
+        /// Wait a logarithmically-increasing duration before each retry (<c>y = m(log(x)+1) + b</c>)
+        /// </summary>
+        /// <param name="coefficient">A duration to multiply by the logarithm to get a duration for this retry delay (<c>m</c>)</param>
+        /// <param name="base">The logarithmic base. Defaults to 10 for a base-10 logirithm.</param>
+        /// <param name="initial">A base duration to add (<c>b</c>)</param>
+        /// <param name="max">An upper limit above which the duration will not increase (the line becomes horizontal at this y-position)</param>
+        /// <returns>A function that can be passed to the <c>delay</c> parameter of <c>Retrier.Attempt</c></returns>
+        public static Func<int, TimeSpan> Logarithm(TimeSpan coefficient, double @base = 10, TimeSpan initial = default, TimeSpan max = default) => retry => Clip(() => {
             checked {
                 @base = @base > 1 ? @base : 10;
-                long ticks = attempt == 0 ? 0 : (long) (coefficient.Ticks * (Math.Log(attempt, @base) + 1));
+                long ticks = retry == 0 ? 0 : (long) (coefficient.Ticks * (Math.Log(retry, @base) + 1));
                 return new TimeSpan(ticks) + initial;
             }
-        }, limit);
+        }, max);
 
+        /// <summary>
+        /// Wait a random duration before each retry
+        /// </summary>
+        /// <param name="max">The upper limit of the duration to wait</param>
+        /// <param name="min">The lower limit of the duration to wait. Defaults to 0 seconds.</param>
+        /// <returns>A function that can be passed to the <c>delay</c> parameter of <c>Retrier.Attempt</c></returns>
         public static Func<int, TimeSpan> MonteCarlo(TimeSpan max, TimeSpan min = default) {
             Random random = new();
             long   range  = (max - min).Ticks;

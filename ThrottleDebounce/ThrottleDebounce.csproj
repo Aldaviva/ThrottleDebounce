@@ -7,7 +7,7 @@
         <Authors>Ben Hutchison</Authors>
         <Company>$(Authors)</Company>
         <Product>ThrottleDebounce</Product>
-        <Version>3.0.0-beta1</Version>
+        <Version>3.0.0-beta2</Version>
         <Description>Rate-limit your actions and funcs by throttling and debouncing them. Retry when an exception is thrown.</Description>
         <Copyright>© 2025 $(Authors)</Copyright>
         <PackageProjectUrl>https://github.com/Aldaviva/ThrottleDebounce</PackageProjectUrl>
@@ -15,7 +15,7 @@
         <RepositoryType>git</RepositoryType>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <PackageTags>throttle debounce rate limit rate-limit ratelimit retry</PackageTags>
-        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <IncludeSource>True</IncludeSource>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <IncludeSymbols>true</IncludeSymbols>
@@ -26,8 +26,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="icon.jpg" Pack="true" PackagePath="\" />
-        <None Include="..\Readme.md" Pack="true" PackagePath="\" />
+        <None Include="icon.jpg;..\Readme.md" Pack="true" PackagePath="\" />
+        <None Include="..\.github*\**" />
     </ItemGroup>
     
     <ItemGroup>
