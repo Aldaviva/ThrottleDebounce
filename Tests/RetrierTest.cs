@@ -264,8 +264,9 @@ public class RetrierTest {
     [InlineData(1, 2000)]
     [InlineData(2, 4000)]
     [InlineData(3, 8000)]
+    [InlineData(128, 60000)]
     public void PowerDelay(int afterAttempt, int expectedMillis) {
-        Func<int, TimeSpan> delay = Retrier.Delays.Power(TimeSpan.FromSeconds(1));
+        Func<int, TimeSpan> delay = Retrier.Delays.Power(TimeSpan.FromSeconds(1), max: TimeSpan.FromMinutes(1));
         delay(afterAttempt).TotalMilliseconds.Should().BeApproximately(expectedMillis, 2);
     }
 

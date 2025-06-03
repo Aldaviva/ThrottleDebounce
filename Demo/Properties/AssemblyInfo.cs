@@ -8,9 +8,9 @@ using System.Windows;
 [assembly: AssemblyTitle("Demo")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Blue Jeans Network")]
+[assembly: AssemblyCompany("Ben Hutchison")]
 [assembly: AssemblyProduct("Demo")]
-[assembly: AssemblyCopyright("Copyright © Blue Jeans Network 2018")]
+[assembly: AssemblyCopyright("© 2025 Ben Hutchison")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

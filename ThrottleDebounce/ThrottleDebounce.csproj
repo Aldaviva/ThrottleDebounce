@@ -2,12 +2,12 @@
 
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
-        <LangVersion>latest</LangVersion>
+        <LangVersion>preview</LangVersion>
         <PackageId>ThrottleDebounce</PackageId>
         <Authors>Ben Hutchison</Authors>
         <Company>$(Authors)</Company>
         <Product>ThrottleDebounce</Product>
-        <Version>3.0.0-beta2</Version>
+        <Version>3.0.0-beta3</Version>
         <Description>Rate-limit your actions and funcs by throttling and debouncing them. Retry when an exception is thrown.</Description>
         <Copyright>© 2025 $(Authors)</Copyright>
         <PackageProjectUrl>https://github.com/Aldaviva/ThrottleDebounce</PackageProjectUrl>

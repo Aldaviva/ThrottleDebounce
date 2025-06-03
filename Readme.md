@@ -26,9 +26,6 @@ This package is [available on NuGet Gallery](https://www.nuget.org/packages/Thro
 ```powershell
 dotnet add package ThrottleDebounce
 ```
-```powershell
-Install-Package ThrottleDebounce
-```
 
 It targets [.NET Standard 2.0](https://learn.microsoft.com/en-us/dotnet/standard/net-standard?tabs=net-standard-2-0) and .NET Framework 4.5.2, so it should be compatible with many runtimes.
 
@@ -150,39 +147,67 @@ Given a function or action, you can execute it and, if it threw an exception, au
 
 ### Usage
 ```cs
-Retrier.Attempt(attempt => MyErrorProneAction(), maxAttempts: 2);
+Retrier.Attempt(attempt => MyErrorProneAction(), new Retrier.Options { MaxAttempts = 2 });
 ```
 
-1. Call **`Retrier.Attempt`**. Pass
-    1. **`Action<int> action`/`Func<int, T> func`** — your delegate to attempt, and possibly retry if it throws exceptions. The attempt number will be passed as the `int` parameter, starting with `0` before the first attempt, and `1` before the first retry. If this func returns a `Task`, it will be awaited to determine if it threw an exception.
-    1. **`int? maxAttempts`** — the total number of times the delegate is allowed to run in this invocation, equal to `1` initial attempt plus up to `maxAttempts - 1` retries if it throws an exception. Must be at least 1, if you pass 0 it will clip to 1. Defaults to 2. For infinite retries, pass `null`.
-    1. **`Func<int, TimeSpan>? delay`** — how long to wait between attempts, as a function of the number of retries that have already run, starting with `0` after the first attempt and before the first retry. You can return a constant `TimeSpan` for a fixed delay, or pass longer values for subsequent attempts to implement, for example, exponential backoff. Optional, defaults to `null`, which means no delay. The minimum value is `0`, the maximum value is `int.MaxValue` (`uint.MaxValue - 1` starting in .NET 6), and values outside this range will be clipped. You can also pass the built-in implementations such as `Retrier.Delays.Constant` and `Retrier.Delays.Exponential`.
-    1. **`Func<Exception, bool>? isRetryAllowed`** — whether the delegate is permitted to execute again after a given `Exception` instance. Return `true` to allow or `false` to deny retries. For example, you may want to retry after HTTP 500 errors since subsequent requests may succeed, but stop after the first failure for an HTTP 403 error which probably won't succeed if the same request is sent again. Optional, `null` defaults to retrying on all exceptions besides `OutOfMemoryException`.
-    1. **`Action<int, Exception>? beforeRetry`/`Func<int, Exception, Task>? beforeRetry`** — a delegate to run extra logic between attempts, for example, if you want to log a message or perform any cleanup before the next attempt. Optional, defaults to not running anything between attempts. The `int` parameter is the attempt number that most recently failed, starting with `0` the first time this delegate is called. The most recent `Exception` is also passed. If this returns a `Task`, it will be awaited before the next retry.
-    1. **`CancellationToken cancellationToken`** — used to cancel the attempts and delays before they have all completed. Optional, defaults to no cancellation token. When cancelled, `Attempt` throws a `TaskCancelledException`.
-1. If your delegate returns a value, it will be returned by `Attempt`.
+Call **`Retrier.Attempt`**.
+
+1. The first argument is an `Action<int>` or `Func<int, T>`, which is your delegate to attempt and possibly retry if it throws exceptions. The attempt number will be passed as the `int` parameter, starting with `0` before the first attempt, and `1` before the first retry. If this delegate returns a `Task`, it will be awaited to determine if it threw an exception.
+1. The second argument is an optional `Options` struct that lets you define the limits and behavior of the retries, with the properties:
+    - `int? MaxAttempts` — the total number of times the delegate is allowed to run in this invocation, equal to `1` initial attempt plus at most `maxAttempts - 1` retries if it throws an exception. Must be at least 1, if you set it to 0 it will clip to 1. Defaults to `null`, which means infinitely many retries.
+    - `TimeSpan? MaxOverallDuration` — the total amount of time that Retrier is allowed to spend on attempts. This is the cumulative duration starting from the invocation of `Retrier.Attempt` and continuing across all attempts, rather than a time limit for each individual attempt. Defaults to null, which means attempts may continue for infinitely long.
+        - If both `MaxAttempts` and `MaxOverallDuration` are non-null, they will apply in conjunction — retries will continue if both the number of attempts is less than `MaxAttempts` and the total elapsed duration is less than `MaxOverallDuration`.
+        - If both `MaxAttempts` and `MaxOverallDuration` are null, Retrier will retry forever until the delegate returns without throwing an exception, or `IsRetryAllowed` returns `false`.
+    - `Func<int, TimeSpan>? Delay` — how long to wait between attempts, as a function of the number of retries that have already run, starting with `0` after the first attempt and before the first retry. You can return a constant `TimeSpan` for a fixed delay, or pass longer values for subsequent attempts to implement, for example, exponential backoff. Optional, defaults to `null`, which means no delay. The minimum value is `0`, the maximum value is `int.MaxValue` (`uint.MaxValue - 1` starting in .NET 6), and values outside this range will be clipped. Retrier will wait for this delay after calling `AfterFailure` and before calling `BeforeRetry`. You can experiment with and visualize different delay strategies and values [on .NET Fiddle](https://dotnetfiddle.net/CxBCrK). Implementations you can pass:
+        - `Retrier.Delays.Constant`
+        - `Retrier.Delays.Linear`
+        - `Retrier.Delays.Exponential`
+        - `Retrier.Delays.Power`
+        - `Retrier.Delays.Logarithm`
+        - `Retrier.Delays.MonteCarlo`
+        - any custom function that returns a `TimeSpan`
+    - `Func<Exception, bool>? IsRetryAllowed` — whether the delegate is permitted to execute again after a given `Exception` instance. Return `true` to allow retries or `false` for `Retrier.Attempt` to throw the disallowed exception. For example, you may want to retry after HTTP 500 errors since subsequent requests may succeed, but stop after the first failure for an HTTP 403 error which probably won't succeed if the same request is sent again. Optional, `null` defaults to retrying on almost all exceptions, but regardless of this property, Retrier never retries on an `OutOfMemoryException`.
+    - `Action<int, Exception>? AfterFailure` — a delegate to run extra logic after an attempt fails, if you want to log a message or perform any cleanup. Optional, defaults to not running anything. The `int` parameter is the attempt number that most recently failed, starting with `0` the first time this delegate is called. The most recent `Exception` is also passed. Runs before waiting for `Delay` and `BeforeRetry`.
+    - `Action<int, Exception>? BeforeRetry` — a delegate to run extra logic before a retry attempt, for example, if you want to log a message or perform any cleanup before the next attempt. Optional, defaults to not running anything. The `int` parameter is the attempt number that will be run next, starting with `1` the first time this delegate is called. The most recent `Exception` is also passed. Runs after `AfterFailure` and waiting for `Delay`.
+    - `CancellationToken? CancellationToken` — used to cancel the attempts and delays before they have all completed. Optional, defaults to no cancellation token. When cancelled, `Attempt` throws a `TaskCancelledException`.
+
+#### Asynchrony
+If the delegate func returns a `Task` or `Task<T>`, Retrier will await it to determine if it threw an exception. In this case, you should await `Retrier.Attempt` to get the final return value or exception.
+
+#### Return value
+If your delegate runs successfully without throwing an exception, `Attempt` will return your delegate func's return value, or `void` if the delegate is an `Action` that doesn't return anything.
+
+#### Exceptions
+If Retrier ran out of attempts or time to retry, it will rethrow the last exception thrown by the delegate, or, if `Options.CancellationToken` was canceled, a `TaskCanceledException`.
 
 ### Example
 
-#### Send at most 5 HTTP requests, 2 seconds apart, until a 200 response is received
+#### Send at most 5 HTTP requests, 2 seconds apart, until a successful response is received
+
 ```cs
+using System.Net;
+using ThrottleDebounce;
+
+Retrier.Options options = new() {
+    MaxAttempts  = 5,
+    Delay        = Retrier.Delays.Constant(TimeSpan.FromSeconds(2)),
+    AfterFailure = (i, exception) => Console.WriteLine(exception is HttpRequestException { StatusCode: { } status } ? $"Received {(int) status} response (attempt #{i:N0})" : exception.Message),
+    BeforeRetry  = (i, exception) => Console.WriteLine($"Retrying (attempt #{i:N0})")
+};
+
 using HttpClient httpClient = new();
 HttpStatusCode statusCode = await Retrier.Attempt(async attempt => {
-    Console.WriteLine($"Attempt #{attempt:N0}...");
-    using HttpResponseMessage response = await httpClient.GetAsync("https://httpbin.org/status/200%2C500");
-
-    Console.WriteLine($"Received response status code {(int) response.StatusCode}.");
+    using HttpResponseMessage response = await httpClient.GetAsync("https://httpbin.org/status/200%2C500"); // randomly return 200 or 500
     response.EnsureSuccessStatusCode(); // throws HttpRequestException for status codes outside the range [200, 300)
     return response.StatusCode;
-}, maxAttempts: 5, delay: Retrier.Delays.Constant(TimeSpan.FromSeconds(2)));
-Console.WriteLine($"Final response: {(int) statusCode}");
+}, options);
+
+Console.WriteLine($"Final response status code: {(int) statusCode}");
 ```
 ```text
-Attempt #0...
-Received response status code 500
-Attempt #1...
-Received response status code 500
-Attempt #2...
-Received response status code 200
-Final response: 200
+Received 500 response (attempt #0)
+Retrying (attempt #1)
+Received 500 response (attempt #1)
+Retrying (attempt #2)
+Final response status code: 200
 ```
