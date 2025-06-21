@@ -9,20 +9,20 @@ internal class FixedSizeArrayPool<T>(int arrayLength, int preferredPoolSize) {
 
     private readonly ConcurrentStack<T[]> _available = new();
 
-    private int BorrowedCount;
+    private int _borrowedCount;
 
     public T[] Borrow() {
         if (!_available.TryPop(out T[] toLend)) {
             toLend = new T[arrayLength];
         }
-        Interlocked.Increment(ref BorrowedCount);
+        Interlocked.Increment(ref _borrowedCount);
         return toLend;
     }
 
     public void Return(T[] borrowed) {
-        int borrowedCountAfterReturn = Interlocked.Decrement(ref BorrowedCount);
-        while (borrowedCountAfterReturn < 0 && borrowedCountAfterReturn != Interlocked.CompareExchange(ref BorrowedCount, 0, borrowedCountAfterReturn)) {
-            borrowedCountAfterReturn = BorrowedCount;
+        int borrowedCountAfterReturn = Interlocked.Decrement(ref _borrowedCount);
+        while (borrowedCountAfterReturn < 0 && borrowedCountAfterReturn != Interlocked.CompareExchange(ref _borrowedCount, 0, borrowedCountAfterReturn)) {
+            borrowedCountAfterReturn = _borrowedCount;
         }
 
         if (borrowedCountAfterReturn + AvailableCount < preferredPoolSize) {

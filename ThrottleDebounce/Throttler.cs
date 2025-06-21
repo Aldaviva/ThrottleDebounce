@@ -8,7 +8,7 @@ namespace ThrottleDebounce;
 /// <seealso cref="Debouncer"/>
 public static class Throttler {
 
-    internal static readonly object[] NO_PARAMS = [];
+    internal static readonly object[] NoParams = [];
 
     /// <summary>
     /// Create a proxy action that throttles <paramref name="action"/>, dropping all but the latest of the invocations that occur too many times in <paramref name="wait"/>. Unlike debouncing, throttling will execute the delegate once per interval in the face of a constant stream of invocations.

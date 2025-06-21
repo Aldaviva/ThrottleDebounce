@@ -18,25 +18,25 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     RateLimitedAction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>, RateLimitedAction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>,
     RateLimitedAction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>, RateLimitedAction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> {
 
-    void RateLimitedAction.Invoke() => OnUserInvocation(Throttler.NO_PARAMS);
+    void RateLimitedAction.Invoke() => OnUserInvocation(Throttler.NoParams);
 
-    TResult? RateLimitedFunc<TResult>.Invoke() => OnUserInvocation(Throttler.NO_PARAMS);
+    TResult? RateLimitedFunc<TResult>.Invoke() => OnUserInvocation(Throttler.NoParams);
 
     void RateLimitedAction<T1>.Invoke(T1 arg1) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0] = arg1!;
         OnUserInvocation(parameters);
     }
 
     void RateLimitedAction<T1, T2>.Invoke(T1 arg1, T2 arg2) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0] = arg1!;
         parameters[1] = arg2!;
         OnUserInvocation(parameters);
     }
 
     void RateLimitedAction<T1, T2, T3>.Invoke(T1 arg1, T2 arg2, T3 arg3) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0] = arg1!;
         parameters[1] = arg2!;
         parameters[2] = arg3!;
@@ -44,7 +44,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     }
 
     void RateLimitedAction<T1, T2, T3, T4>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0] = arg1!;
         parameters[1] = arg2!;
         parameters[2] = arg3!;
@@ -53,7 +53,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     }
 
     void RateLimitedAction<T1, T2, T3, T4, T5>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0] = arg1!;
         parameters[1] = arg2!;
         parameters[2] = arg3!;
@@ -63,7 +63,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     }
 
     void RateLimitedAction<T1, T2, T3, T4, T5, T6>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0] = arg1!;
         parameters[1] = arg2!;
         parameters[2] = arg3!;
@@ -74,7 +74,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     }
 
     void RateLimitedAction<T1, T2, T3, T4, T5, T6, T7>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0] = arg1!;
         parameters[1] = arg2!;
         parameters[2] = arg3!;
@@ -86,7 +86,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     }
 
     void RateLimitedAction<T1, T2, T3, T4, T5, T6, T7, T8>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0] = arg1!;
         parameters[1] = arg2!;
         parameters[2] = arg3!;
@@ -99,7 +99,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     }
 
     void RateLimitedAction<T1, T2, T3, T4, T5, T6, T7, T8, T9>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0] = arg1!;
         parameters[1] = arg2!;
         parameters[2] = arg3!;
@@ -113,7 +113,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     }
 
     void RateLimitedAction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0] = arg1!;
         parameters[1] = arg2!;
         parameters[2] = arg3!;
@@ -128,7 +128,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     }
 
     void RateLimitedAction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0]  = arg1!;
         parameters[1]  = arg2!;
         parameters[2]  = arg3!;
@@ -144,7 +144,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     }
 
     void RateLimitedAction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0]  = arg1!;
         parameters[1]  = arg2!;
         parameters[2]  = arg3!;
@@ -162,7 +162,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
 
     void RateLimitedAction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11,
                                                                                           T12 arg12, T13 arg13) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0]  = arg1!;
         parameters[1]  = arg2!;
         parameters[2]  = arg3!;
@@ -181,7 +181,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
 
     void RateLimitedAction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11,
                                                                                                T12 arg12, T13 arg13, T14 arg14) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0]  = arg1!;
         parameters[1]  = arg2!;
         parameters[2]  = arg3!;
@@ -201,7 +201,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
 
     void RateLimitedAction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10,
                                                                                                     T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0]  = arg1!;
         parameters[1]  = arg2!;
         parameters[2]  = arg3!;
@@ -222,7 +222,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
 
     void RateLimitedAction<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10,
                                                                                                          T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0]  = arg1!;
         parameters[1]  = arg2!;
         parameters[2]  = arg3!;
@@ -243,20 +243,20 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     }
 
     TResult? RateLimitedFunc<T1, TResult>.Invoke(T1 arg1) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0] = arg1!;
         return OnUserInvocation(parameters);
     }
 
     TResult? RateLimitedFunc<T1, T2, TResult>.Invoke(T1 arg1, T2 arg2) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0] = arg1!;
         parameters[1] = arg2!;
         return OnUserInvocation(parameters);
     }
 
     TResult? RateLimitedFunc<T1, T2, T3, TResult>.Invoke(T1 arg1, T2 arg2, T3 arg3) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0] = arg1!;
         parameters[1] = arg2!;
         parameters[2] = arg3!;
@@ -264,7 +264,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     }
 
     TResult? RateLimitedFunc<T1, T2, T3, T4, TResult>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0] = arg1!;
         parameters[1] = arg2!;
         parameters[2] = arg3!;
@@ -273,7 +273,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     }
 
     TResult? RateLimitedFunc<T1, T2, T3, T4, T5, TResult>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0] = arg1!;
         parameters[1] = arg2!;
         parameters[2] = arg3!;
@@ -283,7 +283,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     }
 
     TResult? RateLimitedFunc<T1, T2, T3, T4, T5, T6, TResult>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0] = arg1!;
         parameters[1] = arg2!;
         parameters[2] = arg3!;
@@ -294,7 +294,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     }
 
     TResult? RateLimitedFunc<T1, T2, T3, T4, T5, T6, T7, TResult>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0] = arg1!;
         parameters[1] = arg2!;
         parameters[2] = arg3!;
@@ -306,7 +306,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     }
 
     TResult? RateLimitedFunc<T1, T2, T3, T4, T5, T6, T7, T8, TResult>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0] = arg1!;
         parameters[1] = arg2!;
         parameters[2] = arg3!;
@@ -319,7 +319,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     }
 
     TResult? RateLimitedFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0] = arg1!;
         parameters[1] = arg2!;
         parameters[2] = arg3!;
@@ -333,7 +333,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     }
 
     TResult? RateLimitedFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0] = arg1!;
         parameters[1] = arg2!;
         parameters[2] = arg3!;
@@ -348,7 +348,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     }
 
     TResult? RateLimitedFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0]  = arg1!;
         parameters[1]  = arg2!;
         parameters[2]  = arg3!;
@@ -365,7 +365,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
 
     TResult? RateLimitedFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11,
                                                                                                 T12 arg12) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0]  = arg1!;
         parameters[1]  = arg2!;
         parameters[2]  = arg3!;
@@ -383,7 +383,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
 
     TResult? RateLimitedFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10,
                                                                                                      T11 arg11, T12 arg12, T13 arg13) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0]  = arg1!;
         parameters[1]  = arg2!;
         parameters[2]  = arg3!;
@@ -402,7 +402,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
 
     TResult? RateLimitedFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10,
                                                                                                           T11 arg11, T12 arg12, T13 arg13, T14 arg14) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0]  = arg1!;
         parameters[1]  = arg2!;
         parameters[2]  = arg3!;
@@ -422,7 +422,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
 
     TResult? RateLimitedFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
                                                                                                                T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0]  = arg1!;
         parameters[1]  = arg2!;
         parameters[2]  = arg3!;
@@ -443,7 +443,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
 
     TResult? RateLimitedFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>.Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
                                                                                                                     T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16) {
-        object[] parameters = parameterArrayPool.Borrow();
+        object[] parameters = _parameterArrayPool.Borrow();
         parameters[0]  = arg1!;
         parameters[1]  = arg2!;
         parameters[2]  = arg3!;
