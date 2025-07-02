@@ -7,14 +7,14 @@ using Xunit.Abstractions;
 
 namespace Tests;
 
-public class AsyncTest {
+public class AsyncRetryOptionsTest {
 
     private readonly ITestOutputHelper testOutputHelper;
 
     private RateLimitedFunc<Task> TestDebounce { get; }
     private TaskCompletionSource TestAsyncDone { get; } = new();
 
-    public AsyncTest(ITestOutputHelper testOutputHelper) {
+    public AsyncRetryOptionsTest(ITestOutputHelper testOutputHelper) {
         this.testOutputHelper = testOutputHelper;
         TestDebounce          = Debouncer.Debounce(TestAsync, TimeSpan.FromMilliseconds(200));
     }

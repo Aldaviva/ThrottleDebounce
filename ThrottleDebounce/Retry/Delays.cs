@@ -5,7 +5,7 @@ using System;
 namespace ThrottleDebounce.Retry;
 
 /// <summary>
-/// Built-in implementations of different backoff strategies. These can be set on the <see cref="Options.Delay"/> property of <see cref="Options"/> and <see cref="Options.Async"/>, which are passed to <see cref="Retrier.Attempt(System.Action{long},ThrottleDebounce.Retry.Options)"/> and its overloads.
+/// Built-in implementations of different backoff strategies. These can be set on the <see cref="RetryOptions.Delay"/> property of <see cref="RetryOptions"/> and <see cref="AsyncRetryOptions"/>, which are passed to <see cref="Retrier.Attempt(System.Action{long},RetryOptions)"/> and its overloads.
 /// </summary>
 /// <remarks>To visualize and play with different strategies and values, check out <see href="https://dotnetfiddle.net/PrDP6x"/>.</remarks>
 public static class Delays {
@@ -24,7 +24,7 @@ public static class Delays {
     /// </summary>
     /// <remarks>To visualize and play with different strategies and values, check out <see href="https://dotnetfiddle.net/PrDP6x"/>.</remarks>
     /// <param name="delay">How long to wait before the next retry</param>
-    /// <returns>A function that can be assigned to <see cref="Options.Delay"/></returns>
+    /// <returns>A function that can be assigned to <see cref="RetryOptions.Delay"/></returns>
     public static Func<long, TimeSpan> Constant(TimeSpan delay) => _ => delay;
 
     /// <inheritdoc cref="Constant(System.TimeSpan)" />
@@ -37,7 +37,7 @@ public static class Delays {
     /// <param name="coefficient">A duration to multiply by the next retry's number (starting from 0) to get a duration for this retry delay</param>
     /// <param name="offset">A constant duration to add</param>
     /// <param name="max">An upper limit above which the duration will not increase (the line becomes horizontal at this y-position)</param>
-    /// <returns>A function that can be assigned to <see cref="Options.Delay"/></returns>
+    /// <returns>A function that can be assigned to <see cref="RetryOptions.Delay"/></returns>
     public static Func<long, TimeSpan> Linear(TimeSpan coefficient, TimeSpan offset = default, TimeSpan max = default) => retry => Clip(() => {
         checked {
             long ticks = coefficient.Ticks * retry;
@@ -53,7 +53,7 @@ public static class Delays {
     /// <param name="power">The power to which the retry number (starting from 0) will be raised. Defaults to <c>2</c> to square it.</param>
     /// <param name="offset">A constant duration to add</param>
     /// <param name="max">An upper limit above which the duration will not increase (the line becomes horizontal at this y-position)</param>
-    /// <returns>A function that can be assigned to <see cref="Options.Delay"/></returns>
+    /// <returns>A function that can be assigned to <see cref="RetryOptions.Delay"/></returns>
     public static Func<long, TimeSpan> Exponential(TimeSpan coefficient, double power = 2, TimeSpan offset = default, TimeSpan max = default) => retry => Clip(() => {
         checked {
             long ticks = (long) (coefficient.Ticks * Math.Pow(retry, power));
@@ -69,7 +69,7 @@ public static class Delays {
     /// <param name="base">A number to raise to the power of the number of retries that have already been attempted (starting from 0). Defaults to <c>2</c> for a <c>2^x</c> power series.</param>
     /// <param name="offset">A constant duration to add</param>
     /// <param name="max">An upper limit above which the duration will not increase (the line becomes horizontal at this y-position)</param>
-    /// <returns>A function that can be assigned to <see cref="Options.Delay"/></returns>
+    /// <returns>A function that can be assigned to <see cref="RetryOptions.Delay"/></returns>
     public static Func<long, TimeSpan> Power(TimeSpan coefficient, double @base = 2, TimeSpan offset = default, TimeSpan max = default) => retry => Clip(() => {
         checked {
             long ticks = retry == 0 ? 0 : (long) (coefficient.Ticks * Math.Pow(@base, retry));
@@ -85,7 +85,7 @@ public static class Delays {
     /// <param name="base">The logarithmic base. Defaults to 10 for a base-10 logarithm when omitted or less than 1.</param>
     /// <param name="offset">A constant duration to add</param>
     /// <param name="max">An upper limit above which the duration will not increase (the line becomes horizontal at this y-position)</param>
-    /// <returns>A function that can be assigned to <see cref="Options.Delay"/></returns>
+    /// <returns>A function that can be assigned to <see cref="RetryOptions.Delay"/></returns>
     public static Func<long, TimeSpan> Logarithmic(TimeSpan coefficient, double @base = 10, TimeSpan offset = default, TimeSpan max = default) => retry => Clip(() => {
         checked {
             @base = @base > 1 ? @base : 10;

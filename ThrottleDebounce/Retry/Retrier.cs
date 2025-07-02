@@ -36,9 +36,9 @@ public static class Retrier {
     /// </summary>
     /// <param name="action">An action which is prone to sometimes throw exceptions. The <see cref="long"/> argument is the number of attempts, starting from <c>0</c> for the initial attempt.</param>
     /// <param name="options">Control limits and behaviors of the attempts.</param>
-    /// <exception cref="TaskCanceledException">If the <see cref="Options.CancellationToken"/> is cancelled.</exception>
+    /// <exception cref="TaskCanceledException">If the <see cref="RetryOptions.CancellationToken"/> is cancelled.</exception>
     /// <exception cref="Exception">Any exception thrown by <paramref name="action"/> on its final attempt.</exception>
-    public static void Attempt(Action<long> action, Options options = default) {
+    public static void Attempt(Action<long> action, RetryOptions options = default) {
         Stopwatch  totalDuration = new();
         Exception? lastException = null;
         long       attempt;
@@ -57,7 +57,9 @@ public static class Retrier {
                 if (!ShouldRetry(e, attempt, options) || IsDurationExceeded(totalDuration.Elapsed + delay, options)) throw;
 
                 if (delay > TimeSpan.Zero) {
-                    Task.Delay(delay, options.CancellationToken).GetAwaiter().GetResult(); // Thread.Sleep does not allow cancellation.
+                    // Use Task.Delay because Thread.Sleep does not allow cancellation.
+                    // Synchronously blocking on a Task.Delay never deadlocks, even without ConfigureAwait(false).
+                    Task.Delay(delay, options.CancellationToken).GetAwaiter().GetResult();
                 }
 
                 options.BeforeRetry?.Invoke(e, attempt + 1);
@@ -84,12 +86,12 @@ public static class Retrier {
     /// <param name="func">A function which is prone to sometimes throw exceptions. The <see cref="long"/> argument is the number of attempts, starting from <c>0</c> for the initial attempt.</param>
     /// <param name="options">Control limits and behaviors of the attempts.</param>
     /// <returns>The <typeparamref name="T"/> return value from the first successful attempt of <paramref name="func"/> that does not throw an exception.</returns>
-    /// <exception cref="TaskCanceledException">If the <see cref="Options.CancellationToken"/> is cancelled.</exception>
+    /// <exception cref="TaskCanceledException">If the <see cref="RetryOptions.CancellationToken"/> is cancelled.</exception>
     /// <exception cref="Exception">Any exception thrown by <paramref name="func"/> on its final attempt.</exception>
-    public static T Attempt<T>(Func<long, T> func, Options options = default) {
+    public static T Attempt<T>(Func<long, T> func, RetryOptions options = default) {
         Type typeofT = typeof(T);
         if (typeofT == typeof(Task)) { // Prevent confusing bugs caused by compiler picking the wrong method overload when T is a Task or Task<T>
-            return (T) (object) Attempt((Func<long, Task>) (object) func, (IOptions.Async) options);
+            return (T) (object) Attempt((Func<long, Task>) (object) func, (IAsyncRetryOptions) options);
         } else if (typeofT.IsGenericType && typeofT.GetGenericTypeDefinition() == typeof(Task<>)) {
             return (T) AttemptAsyncWithReturnValue.Value.MakeGenericMethod(typeofT.GenericTypeArguments[0]).Invoke(null, [func, options]);
         }
@@ -137,12 +139,12 @@ public static class Retrier {
     /// <param name="func">An asynchronous function which is prone to sometimes throw exceptions. The <see cref="long"/> argument is the number of attempts, starting from <c>0</c> for the initial attempt.</param>
     /// <param name="options">Control limits and behaviors of the attempts.</param>
     /// <returns>The <see cref="Task"/> return value from the first successful attempt of <paramref name="func"/> that does not throw an exception.</returns>
-    /// <exception cref="TaskCanceledException">If the <see cref="Options.CancellationToken"/> is cancelled.</exception>
+    /// <exception cref="TaskCanceledException">If the <see cref="RetryOptions.CancellationToken"/> is cancelled.</exception>
     /// <exception cref="Exception">Any exception thrown by <paramref name="func"/> on its final attempt.</exception>
-    public static async Task Attempt(Func<long, Task> func, IOptions.Async? options = null) {
+    public static async Task Attempt(Func<long, Task> func, IAsyncRetryOptions? options = null) {
         Stopwatch  totalDuration = new();
         Exception? lastException = null;
-        options ??= new Options.Async();
+        options ??= new AsyncRetryOptions();
         long attempt;
         for (attempt = 0; ShouldLoop(attempt, totalDuration, options); attempt++) {
             try {
@@ -185,12 +187,12 @@ public static class Retrier {
     /// <param name="func">An asynchronous function which is prone to sometimes throw exceptions. The <see cref="long"/> argument is the number of attempts, starting from <c>0</c> for the initial attempt.</param>
     /// <param name="options">Control limits and behaviors of the attempts.</param>
     /// <returns>The <typeparamref name="T"/> return value from the first successful attempt of <paramref name="func"/> that does not throw an exception.</returns>
-    /// <exception cref="TaskCanceledException">If the <see cref="Options.CancellationToken"/> is cancelled.</exception>
+    /// <exception cref="TaskCanceledException">If the <see cref="RetryOptions.CancellationToken"/> is cancelled.</exception>
     /// <exception cref="Exception">Any exception thrown by <paramref name="func"/> on its final attempt.</exception>
-    public static async Task<T> Attempt<T>(Func<long, Task<T>> func, IOptions.Async? options = null) {
+    public static async Task<T> Attempt<T>(Func<long, Task<T>> func, IAsyncRetryOptions? options = null) {
         Stopwatch  totalDuration = new();
         Exception? lastException = null;
-        options ??= new Options.Async();
+        options ??= new AsyncRetryOptions();
         long attempt;
         for (attempt = 0; ShouldLoop(attempt, totalDuration, options); attempt++) {
             try {
@@ -233,14 +235,16 @@ public static class Retrier {
         null                                        => TimeSpan.Zero
     };
 
-    private static bool ShouldRetry(Exception exception, long attempt, Options options) => options.IsRetryAllowed?.Invoke(exception, attempt) ?? true;
-    private static async Task<bool> ShouldRetry(Exception exception, long attempt, IOptions.Async options) => options.IsRetryAllowed?.Invoke(exception, attempt) is not { } task || await task;
+    private static bool ShouldRetry(Exception exception, long attempt, RetryOptions options) => options.IsRetryAllowed?.Invoke(exception, attempt) ?? true;
 
-    private static bool ShouldLoop(long attempt, Stopwatch totalDuration, IOptions options) =>
+    private static async Task<bool> ShouldRetry(Exception exception, long attempt, IAsyncRetryOptions options) =>
+        options.IsRetryAllowed?.Invoke(exception, attempt) is not { } isRetryAllowed || await isRetryAllowed.ConfigureAwait(false);
+
+    private static bool ShouldLoop(long attempt, Stopwatch totalDuration, IRetryOptions options) =>
         (options.MaxAttempts == null || attempt < options.MaxAttempts - 1) &&
         (attempt == 0 || !IsDurationExceeded(totalDuration.Elapsed, options)) &&
         !options.CancellationToken.IsCancellationRequested;
 
-    private static bool IsDurationExceeded(TimeSpan elapsed, IOptions options) => options.MaxOverallDuration < elapsed;
+    private static bool IsDurationExceeded(TimeSpan elapsed, IRetryOptions options) => options.MaxOverallDuration < elapsed;
 
 }
