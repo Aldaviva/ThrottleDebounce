@@ -90,14 +90,17 @@ public record struct RetryOptions(): IAsyncRetryOptions {
     /// <inheritdoc />
     public CancellationToken CancellationToken { get; set; } = CancellationToken.None;
 
+    /// <inheritdoc cref="IsRetryAllowed" />
     readonly Func<Exception, long, Task<bool>>? IAsyncRetryOptions.IsRetryAllowed =>
         IsRetryAllowed is { } isRetryAllowed ? (e, attempt) => Task.FromResult(isRetryAllowed(e, attempt)) : null;
 
+    /// <inheritdoc cref="AfterFailure" />
     readonly Func<Exception, long, Task>? IAsyncRetryOptions.AfterFailure => AfterFailure is { } afterFailure ? (attempt, e) => {
         afterFailure(attempt, e);
         return Retrier.CompletedTask;
     } : null;
 
+    /// <inheritdoc cref="BeforeRetry" />
     readonly Func<Exception, long, Task>? IAsyncRetryOptions.BeforeRetry => BeforeRetry is { } beforeRetry ? (attempt, e) => {
         beforeRetry(attempt, e);
         return Retrier.CompletedTask;
@@ -113,6 +116,7 @@ public record struct AsyncRetryOptions(): IAsyncRetryOptions {
         get;
         set => field = value is < 1 ? 1 : value;
     }
+
     /// <inheritdoc />
     public TimeSpan? MaxOverallDuration {
         get;
@@ -139,10 +143,13 @@ public record struct AsyncRetryOptions(): IAsyncRetryOptions {
     /// <inheritdoc />
     public Func<Exception, long, Task>? BeforeRetry { get; set; }
 
+    /// <inheritdoc cref="IsRetryAllowed" />
     readonly Func<Exception, long, bool>? IRetryOptions.IsRetryAllowed => null;
 
+    /// <inheritdoc cref="AfterFailure" />
     readonly Action<Exception, long>? IRetryOptions.AfterFailure => null;
 
+    /// <inheritdoc cref="BeforeRetry" />
     readonly Action<Exception, long>? IRetryOptions.BeforeRetry => null;
 
 }
