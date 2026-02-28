@@ -56,7 +56,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     private void WaitTimeHasElapsed() {
         if (!disposed
             && Interlocked.Exchange(ref queuedInvocations, 0) > 0
-            && (arity != 0 ? Interlocked.Exchange(ref mostRecentInvocationParameters, null) : Throttler.NO_PARAMS) is { } parameters) {
+            && (arity != 0 ? Interlocked.Exchange(ref mostRecentInvocationParameters, null) : Throttler.NO_PARAMS) is {} parameters) {
 
             mostRecentResult = (TResult) rateLimitedCallback.DynamicInvoke(parameters);
 
@@ -71,7 +71,7 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
     private TResult? OnUserInvocation(object[] arguments) {
         if (!disposed) {
 
-            if (arity != 0 && Interlocked.Exchange(ref mostRecentInvocationParameters, arguments) is { } droppedParameters) {
+            if (arity != 0 && Interlocked.Exchange(ref mostRecentInvocationParameters, arguments) is {} droppedParameters) {
                 parameterArrayPool.Return(droppedParameters);
             }
 
@@ -90,7 +90,8 @@ internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,
 
     private void resetTimers() {
         try {
-            minTimer.Stop();
+            // #13: Restart minTimer without actually changing its interval, which is better than stopping and starting it because that temporarily sets an internal object to null and can cause a concurrency problem when another thread tries to call a method on the null object
+            minTimer.Interval = minTimer.Interval;
             minTimer.Start();
             minTimerRunning = 1;
             maxTimer?.Start();
