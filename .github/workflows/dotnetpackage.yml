@@ -1,4 +1,4 @@
-name: .NET
+﻿name: .NET
 
 on:
   push:
@@ -15,14 +15,14 @@ jobs:
     steps:
     - name: Clone
       uses: actions/checkout@v4
-        
+
     - name: Initialize test reporting
       uses: testspace-com/setup-testspace@v1
       with:
-        domain: ${{github.repository_owner}}
+        domain: ${{ github.repository_owner }}
 
     - name: Restore
-      run: dotnet restore --verbosity normal
+      run: dotnet restore ${{ env.ProjectName }} --verbosity normal
 
     - name: Build
       run: dotnet build ${{ env.ProjectName }} --no-restore --configuration Release
@@ -44,7 +44,7 @@ jobs:
       uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        file: Tests/TestResults/coverage.info
+        files: Tests/TestResults/coverage.info
         format: lcov
 
     - name: Stop if tests failed

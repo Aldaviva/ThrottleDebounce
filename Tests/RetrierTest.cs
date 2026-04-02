@@ -1,4 +1,4 @@
-using ThrottleDebounce.Retry;
+﻿using ThrottleDebounce.Retry;
 
 namespace Tests;
 
