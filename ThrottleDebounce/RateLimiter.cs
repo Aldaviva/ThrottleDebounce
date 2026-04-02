@@ -7,7 +7,7 @@ using Timer = System.Timers.Timer;
 
 namespace ThrottleDebounce;
 
-internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> {
+internal sealed partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> {
 
     private readonly Delegate                   _rateLimitedCallback;
     private readonly bool                       _leading;

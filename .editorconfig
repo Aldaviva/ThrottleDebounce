@@ -1,0 +1,2 @@
+[*.cs]
+dotnet_intransitive_exceptions = System.ArgumentException, System.DivideByZeroException, System.IndexOutOfRangeException, System.InvalidCastException, System.InvalidOperationException, System.Collections.Generic.KeyNotFoundException, System.UnauthorizedAccessException, System.Security.SecurityException, System.FormatException, System.UriFormatException, System.ArrayTypeMismatchException, System.MemberAccessException, System.Reflection.TargetInvocationException

@@ -2,7 +2,7 @@
 
 namespace ThrottleDebounce;
 
-internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>: RateLimitedFunc<TResult>, RateLimitedFunc<T1, TResult>,
+internal sealed partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>: RateLimitedFunc<TResult>, RateLimitedFunc<T1, TResult>,
     RateLimitedFunc<T1, T2, TResult>,
     RateLimitedFunc<T1, T2, T3, TResult>, RateLimitedFunc<T1, T2, T3, T4, TResult>, RateLimitedFunc<T1, T2, T3, T4, T5, TResult>, RateLimitedFunc<T1, T2, T3, T4, T5, T6, TResult>,
     RateLimitedFunc<T1, T2, T3, T4, T5, T6, T7, TResult>, RateLimitedFunc<T1, T2, T3, T4, T5, T6, T7, T8, TResult>, RateLimitedFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>,

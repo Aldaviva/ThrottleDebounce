@@ -1,4 +1,4 @@
-﻿ThrottleDebounce
+ThrottleDebounce
 ===
 
 [![Package Version](https://img.shields.io/nuget/v/ThrottleDebounce?logo=nuget&label=version)](https://www.nuget.org/packages/ThrottleDebounce/) [![NuGet Gallery Download Count](https://img.shields.io/nuget/dt/ThrottleDebounce?logo=nuget&color=blue
