@@ -11,8 +11,8 @@ internal static class OverloadGeneratorMain {
         // Console.WriteLine(generateBuilderMethods(false));
         // Console.WriteLine(generateBuilderMethods(true));
         // Console.WriteLine(generateInterfaces());
-        // Console.WriteLine(generateImplementationMethods());
-        Console.WriteLine(generateTests());
+        Console.WriteLine(generateImplementationMethods());
+        // Console.WriteLine(generateTests());
     }
 
     private static string generateInterfaces() {
@@ -53,11 +53,11 @@ internal static class OverloadGeneratorMain {
     private static string generateImplementationMethods() {
         string actions = string.Join("\n\n", Enumerable.Range(1, MAX_TYPE_PARAMS)
             .Select(paramCount =>
-                $"void RateLimitedAction<{joinNumbers(paramCount)}>.Invoke({joinNumbers(paramCount, i => $"T{i} arg{i}")}) {{\n    object[] parameters = parameterArrayPool.Borrow();\n    {joinNumbers(paramCount, i => $"parameters[{i - 1}] = arg{i}!;", "\n    ")} \n    OnUserInvocation(parameters);\n}}"));
+                $"void RateLimitedAction<{joinNumbers(paramCount)}>.Invoke({joinNumbers(paramCount, i => $"T{i} arg{i}")}) =>\n    OnUserInvocation([{joinNumbers(paramCount, "arg", suffix: "!")}]);"));
 
         string funcs = string.Join("\n\n", Enumerable.Range(1, MAX_TYPE_PARAMS)
             .Select(paramCount =>
-                $"TResult? RateLimitedFunc<{joinNumbers(paramCount)}, TResult>.Invoke({joinNumbers(paramCount, i => $"T{i} arg{i}")}) {{\n    object[] parameters = parameterArrayPool.Borrow();\n    {joinNumbers(paramCount, i => $"parameters[{i - 1}] = arg{i}!;", "\n    ")} \n    return OnUserInvocation(parameters);\n}}"));
+                $"TResult? RateLimitedFunc<{joinNumbers(paramCount)}, TResult>.Invoke({joinNumbers(paramCount, i => $"T{i} arg{i}")}) =>\n    OnUserInvocation([{joinNumbers(paramCount, "arg", suffix: "!")}]);"));
 
         return actions + "\n\n" + funcs;
     }

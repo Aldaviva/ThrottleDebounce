@@ -7,7 +7,7 @@
         <Authors>Ben Hutchison</Authors>
         <Company>$(Authors)</Company>
         <Product>ThrottleDebounce</Product>
-        <Version>3.0.0-beta5</Version>
+        <Version>3.0.0-beta6</Version>
         <Description>Rate-limit your actions and funcs by throttling and debouncing them. Retry when an exception is thrown.</Description>
         <Copyright>© 2026 $(Authors)</Copyright>
         <PackageProjectUrl>https://github.com/Aldaviva/ThrottleDebounce</PackageProjectUrl>

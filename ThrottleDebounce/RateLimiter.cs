@@ -9,13 +9,12 @@ namespace ThrottleDebounce;
 
 internal sealed partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> {
 
-    private readonly Delegate                   _rateLimitedCallback;
-    private readonly bool                       _leading;
-    private readonly bool                       _trailing;
-    private readonly Timer                      _minTimer;
-    private readonly Timer?                     _maxTimer;
-    private readonly FixedSizeArrayPool<object> _parameterArrayPool;
-    private readonly int                        _arity;
+    private readonly Delegate _rateLimitedCallback;
+    private readonly bool     _leading;
+    private readonly bool     _trailing;
+    private readonly Timer    _minTimer;
+    private readonly Timer?   _maxTimer;
+    private readonly int      _arity;
 
     private int       _queuedInvocations;
     private object[]? _mostRecentInvocationParameters;
@@ -37,9 +36,7 @@ internal sealed partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
         _rateLimitedCallback = rateLimitedCallback;
         _leading             = leading;
         _trailing            = trailing;
-
-        _arity              = _rateLimitedCallback.GetMethodInfo().GetParameters().Length;
-        _parameterArrayPool = _arity != 0 ? new FixedSizeArrayPool<object>(_arity, 2) : null!;
+        _arity               = _rateLimitedCallback.GetMethodInfo().GetParameters().Length;
 
         _minTimer = new Timer { AutoReset = false, Interval = wait.TotalMilliseconds };
         _minTimer.Elapsed += delegate {
@@ -60,21 +57,13 @@ internal sealed partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
             _mostRecentResult = (TResult) _rateLimitedCallback.DynamicInvoke(parameters);
 
-            if (_arity != 0) {
-                _parameterArrayPool.Return(parameters);
-            }
-
             ResetTimers();
         }
     }
 
     private TResult? OnUserInvocation(object[] arguments) {
         if (!_disposed) {
-
-            if (_arity != 0 && Interlocked.Exchange(ref _mostRecentInvocationParameters, arguments) is {} droppedParameters) {
-                _parameterArrayPool.Return(droppedParameters);
-            }
-
+            _mostRecentInvocationParameters = arguments;
             bool isMinTimerRunning = Interlocked.Exchange(ref _minTimerRunning, 1) != 0;
             if (_leading && !isMinTimerRunning) {
                 _mostRecentResult = (TResult) _rateLimitedCallback.DynamicInvoke(arguments);
@@ -101,13 +90,15 @@ internal sealed partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
     }
 
     public void Dispose() {
-        _disposed = true;
-        _minTimer.Dispose();
-        _maxTimer?.Dispose();
-        _queuedInvocations              = 0;
-        _minTimerRunning                = 0;
-        _mostRecentResult               = default;
-        _mostRecentInvocationParameters = null;
+        if (!_disposed) {
+            _disposed = true;
+            _minTimer.Dispose();
+            _maxTimer?.Dispose();
+            _queuedInvocations              = 0;
+            _minTimerRunning                = 0;
+            _mostRecentResult               = default;
+            _mostRecentInvocationParameters = null;
+        }
     }
 
 }
