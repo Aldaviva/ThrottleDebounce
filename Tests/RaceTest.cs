@@ -1,11 +1,3 @@
-using FluentAssertions;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using ThrottleDebounce;
-using Xunit;
-
 namespace Tests;
 
 public class RaceTest {
@@ -25,7 +17,7 @@ public class RaceTest {
             throttled.Invoke();
         })));
 
-        await Task.Delay(throttleDuration * 1.5);
+        await Task.Delay(throttleDuration * 1.5, TestContext.Current.CancellationToken);
 
         executions.Should().Be(1);
     }

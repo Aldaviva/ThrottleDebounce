@@ -1,9 +1,4 @@
-using FluentAssertions;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using ThrottleDebounce.Retry;
-using Xunit;
 
 namespace Tests;
 
