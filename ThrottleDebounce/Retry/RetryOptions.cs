@@ -1,9 +1,5 @@
 #nullable enable
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-
 // ReSharper disable UnusedMember.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
@@ -68,10 +64,10 @@ public record struct RetryOptions(): IAsyncRetryOptions {
     public TimeSpan? MaxOverallDuration {
         get;
         set => field = value switch {
-            null                                                   => null,
-            { } infinite when infinite == Timeout.InfiniteTimeSpan => null,
-            { } negative when negative < TimeSpan.Zero             => TimeSpan.Zero,
-            _                                                      => value
+            null                                                  => null,
+            {} infinite when infinite == Timeout.InfiniteTimeSpan => null,
+            {} negative when negative < TimeSpan.Zero             => TimeSpan.Zero,
+            _                                                     => value
         };
     }
 
@@ -92,16 +88,16 @@ public record struct RetryOptions(): IAsyncRetryOptions {
 
     /// <inheritdoc cref="IsRetryAllowed" />
     readonly Func<Exception, long, Task<bool>>? IAsyncRetryOptions.IsRetryAllowed =>
-        IsRetryAllowed is { } isRetryAllowed ? (e, attempt) => Task.FromResult(isRetryAllowed(e, attempt)) : null;
+        IsRetryAllowed is {} isRetryAllowed ? (e, attempt) => Task.FromResult(isRetryAllowed(e, attempt)) : null;
 
     /// <inheritdoc cref="AfterFailure" />
-    readonly Func<Exception, long, Task>? IAsyncRetryOptions.AfterFailure => AfterFailure is { } afterFailure ? (attempt, e) => {
+    readonly Func<Exception, long, Task>? IAsyncRetryOptions.AfterFailure => AfterFailure is {} afterFailure ? (attempt, e) => {
         afterFailure(attempt, e);
         return Retrier.CompletedTask;
     } : null;
 
     /// <inheritdoc cref="BeforeRetry" />
-    readonly Func<Exception, long, Task>? IAsyncRetryOptions.BeforeRetry => BeforeRetry is { } beforeRetry ? (attempt, e) => {
+    readonly Func<Exception, long, Task>? IAsyncRetryOptions.BeforeRetry => BeforeRetry is {} beforeRetry ? (attempt, e) => {
         beforeRetry(attempt, e);
         return Retrier.CompletedTask;
     } : null;
@@ -121,10 +117,10 @@ public record struct AsyncRetryOptions(): IAsyncRetryOptions {
     public TimeSpan? MaxOverallDuration {
         get;
         set => field = value switch {
-            null                                                   => null,
-            { } infinite when infinite == Timeout.InfiniteTimeSpan => null,
-            { } negative when negative < TimeSpan.Zero             => TimeSpan.Zero,
-            _                                                      => value
+            null                                                  => null,
+            {} infinite when infinite == Timeout.InfiniteTimeSpan => null,
+            {} negative when negative < TimeSpan.Zero             => TimeSpan.Zero,
+            _                                                     => value
         };
     }
 

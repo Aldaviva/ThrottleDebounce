@@ -2,16 +2,17 @@
 
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
+        <Version>3.0.0-beta6</Version>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
         <LangVersion>preview</LangVersion>
-        <PackageId>ThrottleDebounce</PackageId>
         <Authors>Ben Hutchison</Authors>
         <Company>$(Authors)</Company>
-        <Product>ThrottleDebounce</Product>
-        <Version>3.0.0-beta6</Version>
-        <Description>Rate-limit your actions and funcs by throttling and debouncing them. Retry when an exception is thrown.</Description>
         <Copyright>© 2026 $(Authors)</Copyright>
+        <Description>Rate-limit your actions and funcs by throttling and debouncing them. Retry when an exception is thrown.</Description>
         <PackageProjectUrl>https://github.com/Aldaviva/ThrottleDebounce</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/Aldaviva/ThrottleDebounce.git</RepositoryUrl>
+        <PackageReleaseNotes>$(PackageProjectUrl)/releases/tag/$(Version)</PackageReleaseNotes>
+        <RepositoryUrl>$(PackageProjectUrl).git</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <PackageTags>throttle debounce rate limit rate-limit ratelimit retry</PackageTags>
@@ -34,7 +35,15 @@
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.201" PrivateAssets="All" />
     </ItemGroup>
     
-    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true' or '$(Configuration)' == 'Release'">
+    <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.0'))">
+        <PackageReference Include="Microsoft.CSharp" Version="4.7.0" /> <!-- DLR -->
+    </ItemGroup>
+    
+    <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net452'))">
+        <Reference Include="Microsoft.CSharp" />
+    </ItemGroup>
+    
+    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true' or '$(Configuration)' != 'Debug'">
         <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     </PropertyGroup>
 

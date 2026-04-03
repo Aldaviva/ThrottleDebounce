@@ -1,8 +1,5 @@
 #nullable enable
 
-using System;
-using System.Reflection;
-using System.Threading;
 using Timer = System.Timers.Timer;
 
 namespace ThrottleDebounce;
@@ -14,7 +11,7 @@ internal sealed partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
     private readonly bool     _trailing;
     private readonly Timer    _minTimer;
     private readonly Timer?   _maxTimer;
-    private readonly int      _arity;
+    private readonly byte     _arity;
 
     private int       _queuedInvocations;
     private object[]? _mostRecentInvocationParameters;
@@ -24,19 +21,19 @@ internal sealed partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
     private volatile bool _disposed;
 
     /// <exception cref="ArgumentException">if <paramref name="leading"/> and <paramref name="trailing"/> were both <c>false</c>, or if <paramref name="maxWait"/> is non-positive</exception>
-    internal RateLimiter(Delegate rateLimitedCallback, TimeSpan wait, bool leading, bool trailing, TimeSpan maxWait = default) {
+    internal RateLimiter(Delegate rateLimitedCallback, byte arity, TimeSpan wait, bool leading, bool trailing, TimeSpan maxWait = default) {
         if (!leading && !trailing) {
-            throw new ArgumentException("One or both of the leading and trailing arguments must be true, but both were false.");
-        } else if (TimeSpan.Zero.Equals(wait)) {
-            throw new ArgumentException("The wait argument must have a positive duration.");
+            throw new ArgumentException($"One or both of the {nameof(leading)} and {nameof(trailing)} arguments must be true, but both were false.");
+        } else if (wait <= TimeSpan.Zero) {
+            throw new ArgumentException("Duration must be positive", nameof(wait));
         } else if (maxWait < TimeSpan.Zero) {
-            throw new ArgumentException("The maxWait argument must not have a negative duration.");
+            throw new ArgumentException("Duration must not be negative", nameof(maxWait));
         }
 
         _rateLimitedCallback = rateLimitedCallback;
+        _arity               = arity;
         _leading             = leading;
         _trailing            = trailing;
-        _arity               = _rateLimitedCallback.GetMethodInfo().GetParameters().Length;
 
         _minTimer = new Timer { AutoReset = false, Interval = wait.TotalMilliseconds };
         _minTimer.Elapsed += delegate {
@@ -55,7 +52,7 @@ internal sealed partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
             && Interlocked.Exchange(ref _queuedInvocations, 0) > 0
             && (_arity != 0 ? Interlocked.Exchange(ref _mostRecentInvocationParameters, null) : Throttler.NoParams) is {} parameters) {
 
-            _mostRecentResult = (TResult) _rateLimitedCallback.DynamicInvoke(parameters);
+            _mostRecentResult = InvokeCallback(parameters);
 
             ResetTimers();
         }
@@ -66,7 +63,7 @@ internal sealed partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
             _mostRecentInvocationParameters = arguments;
             bool isMinTimerRunning = Interlocked.Exchange(ref _minTimerRunning, 1) != 0;
             if (_leading && !isMinTimerRunning) {
-                _mostRecentResult = (TResult) _rateLimitedCallback.DynamicInvoke(arguments);
+                _mostRecentResult = InvokeCallback(arguments);
             } else if (_trailing) {
                 Interlocked.Add(ref _queuedInvocations, 1);
             }
@@ -102,3 +99,5 @@ internal sealed partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
     }
 
 }
+
+internal readonly struct Void;

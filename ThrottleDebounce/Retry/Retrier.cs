@@ -1,11 +1,7 @@
 #nullable enable
 
-using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ThrottleDebounce.Retry;
 
@@ -229,16 +225,16 @@ public static class Retrier {
     }
 
     private static TimeSpan GetDelay(Func<long, TimeSpan>? delay, long attempt) => delay?.Invoke(attempt) switch {
-        { } duration when duration <= TimeSpan.Zero => TimeSpan.Zero,
-        { } duration when duration > MaxDelay       => MaxDelay,
-        { } duration                                => duration,
-        null                                        => TimeSpan.Zero
+        {} duration when duration <= TimeSpan.Zero => TimeSpan.Zero,
+        {} duration when duration > MaxDelay       => MaxDelay,
+        {} duration                                => duration,
+        null                                       => TimeSpan.Zero
     };
 
     private static bool ShouldRetry(Exception exception, long attempt, RetryOptions options) => options.IsRetryAllowed?.Invoke(exception, attempt) ?? true;
 
     private static async Task<bool> ShouldRetry(Exception exception, long attempt, IAsyncRetryOptions options) =>
-        options.IsRetryAllowed?.Invoke(exception, attempt) is not { } isRetryAllowed || await isRetryAllowed.ConfigureAwait(false);
+        options.IsRetryAllowed?.Invoke(exception, attempt) is not {} isRetryAllowed || await isRetryAllowed.ConfigureAwait(false);
 
     private static bool ShouldLoop(long attempt, Stopwatch totalDuration, IRetryOptions options) =>
         (options.MaxAttempts == null || attempt < options.MaxAttempts - 1) &&
