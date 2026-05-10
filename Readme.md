@@ -24,7 +24,7 @@ This is a .NET library that lets you rate-limit delegates so they are only execu
 ## Installation
 This package is [available on NuGet Gallery](https://www.nuget.org/packages/ThrottleDebounce/).
 ```powershell
-dotnet add package ThrottleDebounce
+dotnet package add ThrottleDebounce
 ```
 ```powershell
 Install-Package ThrottleDebounce

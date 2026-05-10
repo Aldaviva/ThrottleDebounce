@@ -7,11 +7,12 @@
         <Authors>Ben Hutchison</Authors>
         <Company>$(Authors)</Company>
         <Product>ThrottleDebounce</Product>
-        <Version>2.0.2-beta.1</Version>
+        <Version>2.0.2</Version>
         <Description>Rate-limit your actions and funcs by throttling and debouncing them. Retry when an exception is thrown.</Description>
         <Copyright>© 2026 $(Authors)</Copyright>
         <PackageProjectUrl>https://github.com/Aldaviva/ThrottleDebounce</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/Aldaviva/ThrottleDebounce.git</RepositoryUrl>
+        <RepositoryUrl>$(PackageProjectUrl).git</RepositoryUrl>
+        <PackageReleaseNotes>$(PackageProjectUrl)/releases/tag/$(Version)</PackageReleaseNotes>
         <RepositoryType>git</RepositoryType>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <PackageTags>throttle debounce rate limit rate-limit ratelimit retry</PackageTags>
@@ -31,7 +32,7 @@
     </ItemGroup>
     
     <ItemGroup>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.103" PrivateAssets="All" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.203" PrivateAssets="All" />
     </ItemGroup>
     
     <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true' or '$(Configuration)' == 'Release'">
