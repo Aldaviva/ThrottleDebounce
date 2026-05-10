@@ -11,6 +11,7 @@ This is a .NET library that lets you rate-limit delegates so they are only execu
 <!-- MarkdownTOC autolink="true" bracket="round" autoanchor="false" levels="1,2,3" -->
 
 - [Installation](#installation)
+    - [Upgrades](#upgrades)
 - [Rate limiting](#rate-limiting)
     - [Usage](#usage)
     - [Understanding throttling and debouncing](#understanding-throttling-and-debouncing)
@@ -23,11 +24,14 @@ This is a .NET library that lets you rate-limit delegates so they are only execu
 
 ## Installation
 This package is [available on NuGet Gallery](https://www.nuget.org/packages/ThrottleDebounce/).
-```powershell
+```ps1
 dotnet package add ThrottleDebounce
 ```
 
 It targets [.NET Standard 2.0](https://learn.microsoft.com/en-us/dotnet/standard/net-standard?tabs=net-standard-2-0) and .NET Framework 4.5.2, so it should be compatible with many runtimes.
+
+### Upgrades
+[Major version upgrades introduce breaking changes.](https://github.com/Aldaviva/ThrottleDebounce/wiki/Breaking-changes-in-major-version-upgrades)
 
 ## Rate limiting
 
@@ -160,10 +164,10 @@ Call **`Retrier.Attempt`**.
 
 1. The first argument is an `Action<long>` or `Func<long, T>`, which is your delegate to attempt and possibly retry if it throws exceptions. The attempt number will be passed as the `long` parameter, starting with `0` for the first attempt, and increasing by `1` for each retry. If this func returns a task, it will be awaited to determine if it threw an exception.
 1. The second argument is an optional `RetryOptions` or `AsyncRetryOptions` struct that lets you define the limits and behavior of the retries, with the optional properties:
-    - `long? MaxAttempts` — the total number of times the delegate is allowed to run in this invocation, equal to `1` initial attempt plus at most `maxAttempts - 1` retries if it throws an exception. Must be at least `1`; if you set it to `0` it will clip to `1`. Defaults to `null`, which means infinitely many retries.
+    - `long? MaxAttempts` — the total number of times the delegate is allowed to run in this invocation, equal to one initial attempt plus at most `MaxAttempts - 1` retries if it throws an exception. Must be at least `1`; if you set it to `0` it will clip to `1`. Defaults to `null`, which means infinitely many retries.
     - `TimeSpan? MaxOverallDuration` — the total amount of time that Retrier is allowed to spend on attempts. This is the cumulative duration starting from the invocation of `Retrier.Attempt` and continuing across all attempts, including delays, rather than a time limit for each individual attempt. Defaults to `null`, which means attempts may continue for infinitely long.
         - If both `MaxAttempts` and `MaxOverallDuration` are non-null, they will apply in conjunction — retries will continue iff both the number of attempts is less than `MaxAttempts` and the total elapsed duration is less than `MaxOverallDuration`.
-        - If both `MaxAttempts` and `MaxOverallDuration` are `null`, Retrier will retry forever until the delegate returns without throwing an exception, or `IsRetryAllowed` returns `false`.
+        - If both `MaxAttempts` and `MaxOverallDuration` are `null`, Retrier will retry forever until either the delegate returns without throwing an exception, `IsRetryAllowed` returns `false`, or `CancellationToken` is canceled.
     - `Func<long, TimeSpan>? Delay` — how long to wait between attempts, as a function of the number of retries that have already run, starting with `0` after the failed first attempt and before the first retry. You can return a constant `TimeSpan` for a fixed delay, or pass longer values for subsequent attempts to implement, for example, exponential backoff. Optional, defaults to `null`, which means no delay. The minimum value is `0`, the maximum value is `int.MaxValue` (`uint.MaxValue - 1` in .NET ≥ 6), and values outside this range will be clipped. Retrier will wait for this delay after calling `AfterFailure` and before calling `BeforeRetry`. You can experiment with and visualize different delay strategies and values [on .NET Fiddle](https://dotnetfiddle.net/PrDP6x). Implementations you can pass:
         - `Delays.Constant`
         - `Delays.Linear`
@@ -173,9 +177,9 @@ Call **`Retrier.Attempt`**.
         - `Delays.MonteCarlo`
         - any custom function that returns a `TimeSpan`
     - `Func<Exception, long, bool>? IsRetryAllowed` — whether the delegate is permitted to execute again after a given `Exception` instance and attempt number, starting with `0`. Return `true` to allow another retry, or `false` for `Retrier.Attempt` to abort and throw the disallowed exception. For example, you may want to retry after HTTP 500 errors since subsequent requests may succeed, but stop after the first failure for an HTTP 403 error which probably won't succeed if the same request is sent again. Optional, `null` defaults to retrying on all exceptions, but regardless of this property, Retrier never retries on an `OutOfMemoryException`. If your attempt func is asynchronous, you may specify an asynchronous `IsRetryAllowed` by creating an `AsyncRetryOptions` instead of `RetryOptions`.
-    - `Action<Exception, long>? AfterFailure` — a delegate to run extra logic after an attempt fails, if you want to log a message or perform any cleanup. Similar to `BeforeRetry` except it runs before waiting for `Delay` instead of after. Optional, defaults to not running anything. The `long` parameter is the attempt number that most recently failed, starting with `0` the first time this action is called. The most recent `Exception` is also passed. Runs before waiting for `Delay` and `BeforeRetry`. If your attempt func is asynchronous, you may specify an asynchronous `AfterFailure` by creating an `AsyncRetryOptions` instead of `RetryOptions`.
-    - `Action<Exception, long>? BeforeRetry` — a delegate to run extra logic before a retry attempt, for example, if you want to log a message or perform any cleanup before the next attempt. Similar to `AfterFailure` except it runs after waiting for `Delay` instead of before. Optional, defaults to not running anything. The `long` parameter is the attempt number that will be run next, starting with `1` the first time this action is called. The most recent `Exception` is also passed. Runs after both `AfterFailure` and waiting for `Delay`. If your attempt func is asynchronous, you may specify an asynchronous `BeforeRetry` by creating an `AsyncRetryOptions` instead of `RetryOptions`.
-    - `CancellationToken? CancellationToken` — used to cancel the attempts and delays before they have all completed. Optional, defaults to no cancellation token. When cancelled, `Attempt` throws a `TaskCancelledException`.
+    - `Action<Exception, long>? AfterFailure` — a delegate to run extra logic after an attempt fails, if you want to log a message or perform any cleanup. Similar to `BeforeRetry` except this runs before waiting for `Delay` instead of after. Optional, defaults to not running anything. The `long` parameter is the attempt number that most recently failed, starting with `0` the first time this action is called. The most recent `Exception` is also passed. Runs before waiting for `Delay` and `BeforeRetry`. If your attempt func is asynchronous, you may specify an asynchronous `AfterFailure` by creating an `AsyncRetryOptions` instead of `RetryOptions`.
+    - `Action<Exception, long>? BeforeRetry` — a delegate to run extra logic before a retry attempt, for example, if you want to log a message or perform any cleanup before the next attempt. Similar to `AfterFailure` except this runs after waiting for `Delay` instead of before. Optional, defaults to not running anything. The `long` parameter is the attempt number that will be run next, starting with `1` the first time this action is called. The most recent `Exception` is also passed. Runs after both `AfterFailure` and waiting for `Delay`. If your attempt func is asynchronous, you may specify an asynchronous `BeforeRetry` by creating an `AsyncRetryOptions` instead of `RetryOptions`.
+    - `CancellationToken? CancellationToken` — used to cancel the attempts and delays before they have all completed. Optional, defaults to no cancellation token. When cancelled, `Attempt` throws a `TaskCanceledException`.
 
 #### Asynchrony
 If the delegate `Func` returns a `Task` or `Task<T>`, Retrier will await it to determine if it threw an exception. In this case, you should `await Retrier.Attempt` to get the final return value or exception.
