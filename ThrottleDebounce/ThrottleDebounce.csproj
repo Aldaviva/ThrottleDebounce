@@ -1,22 +1,23 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
+        <TargetFrameworks>netstandard2.0;net452;netcoreapp3.1</TargetFrameworks>
+        <Version>3.0.0</Version>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
         <LangVersion>latest</LangVersion>
-        <PackageId>ThrottleDebounce</PackageId>
         <Authors>Ben Hutchison</Authors>
         <Company>$(Authors)</Company>
-        <Product>ThrottleDebounce</Product>
-        <Version>2.0.2</Version>
-        <Description>Rate-limit your actions and funcs by throttling and debouncing them. Retry when an exception is thrown.</Description>
         <Copyright>© 2026 $(Authors)</Copyright>
+        <Description>Rate-limit your actions and funcs by throttling and debouncing them. Retry when an exception is thrown.</Description>
         <PackageProjectUrl>https://github.com/Aldaviva/ThrottleDebounce</PackageProjectUrl>
         <RepositoryUrl>$(PackageProjectUrl).git</RepositoryUrl>
         <PackageReleaseNotes>$(PackageProjectUrl)/releases/tag/$(Version)</PackageReleaseNotes>
         <RepositoryType>git</RepositoryType>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <PackageTags>throttle debounce rate limit rate-limit ratelimit retry</PackageTags>
-        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <IncludeSource>true</IncludeSource>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <IncludeSymbols>true</IncludeSymbols>
@@ -32,10 +33,18 @@
     </ItemGroup>
     
     <ItemGroup>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.203" PrivateAssets="All" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="[10.0.112, 10.0.200)" PrivateAssets="All" />
     </ItemGroup>
     
-    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true' or '$(Configuration)' == 'Release'">
+    <!-- DLR -->
+    <ItemGroup Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETStandard'">
+        <PackageReference Include="Microsoft.CSharp" Version="4.7.0" /> 
+    </ItemGroup>
+    <ItemGroup Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETFramework'">
+        <Reference Include="Microsoft.CSharp" />
+    </ItemGroup>
+    
+    <PropertyGroup Condition="'$(CI)' == 'true' or '$(Configuration)' != 'Debug'">
         <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     </PropertyGroup>
 

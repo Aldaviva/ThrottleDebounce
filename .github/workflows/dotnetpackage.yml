@@ -3,7 +3,6 @@ name: .NET
 on:
   push:
     branches: [ master ]
-
   workflow_dispatch:
 
 jobs:
@@ -14,6 +13,9 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    - name: Unfuck Git
+      run: git config set --global core.autocrlf false
+
     - name: Clone
       uses: actions/checkout@v6
 

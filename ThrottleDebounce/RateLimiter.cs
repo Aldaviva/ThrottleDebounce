@@ -1,113 +1,103 @@
 #nullable enable
 
-using System;
-using System.Reflection;
-using System.Threading;
 using Timer = System.Timers.Timer;
 
 namespace ThrottleDebounce;
 
-internal partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> {
+internal sealed partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> {
 
-    private readonly Delegate                   rateLimitedCallback;
-    private readonly bool                       leading;
-    private readonly bool                       trailing;
-    private readonly Timer                      minTimer;
-    private readonly Timer?                     maxTimer;
-    private readonly FixedSizeArrayPool<object> parameterArrayPool;
-    private readonly int                        arity;
+    private readonly Delegate _rateLimitedCallback;
+    private readonly bool     _leading;
+    private readonly bool     _trailing;
+    private readonly Timer    _minTimer;
+    private readonly Timer?   _maxTimer;
+    private readonly byte     _arity;
 
-    private int       queuedInvocations;
-    private object[]? mostRecentInvocationParameters;
-    private TResult?  mostRecentResult;
+    private int       _queuedInvocations;
+    private object[]? _mostRecentInvocationParameters;
+    private TResult?  _mostRecentResult;
 
-    private volatile int  minTimerRunning;
-    private volatile bool disposed;
+    private volatile int  _minTimerRunning;
+    private volatile bool _disposed;
 
-    /// <exception cref="ArgumentException">if <paramref name="leading"/> and <paramref name="trailing"/> were both <see langword="false"/>, or if <paramref name="maxWait"/> is non-positive</exception>
-    internal RateLimiter(Delegate rateLimitedCallback, TimeSpan wait, bool leading, bool trailing, TimeSpan maxWait = default) {
+    /// <exception cref="ArgumentException">if <paramref name="leading"/> and <paramref name="trailing"/> were both <c>false</c>, or if <paramref name="maxWait"/> is non-positive</exception>
+    internal RateLimiter(Delegate rateLimitedCallback, byte arity, TimeSpan wait, bool leading, bool trailing, TimeSpan maxWait = default) {
         if (!leading && !trailing) {
-            throw new ArgumentException("One or both of the leading and trailing arguments must be true, but both were false.");
-        } else if (TimeSpan.Zero.Equals(wait)) {
-            throw new ArgumentException("The wait argument must have a positive duration.");
+            throw new ArgumentException($"One or both of the {nameof(leading)} and {nameof(trailing)} arguments must be true, but both were false.");
         } else if (maxWait < TimeSpan.Zero) {
-            throw new ArgumentException("The maxWait argument must not have a negative duration.");
+            throw new ArgumentException("Duration must not be negative", nameof(maxWait));
+        } else if (wait <= TimeSpan.Zero) {
+            throw new ArgumentException("Duration must be positive", nameof(wait));
         }
 
-        this.rateLimitedCallback = rateLimitedCallback;
-        this.leading             = leading;
-        this.trailing            = trailing;
+        _rateLimitedCallback = rateLimitedCallback;
+        _arity               = arity;
+        _leading             = leading;
+        _trailing            = trailing;
 
-        arity              = this.rateLimitedCallback.GetMethodInfo().GetParameters().Length;
-        parameterArrayPool = arity != 0 ? new FixedSizeArrayPool<object>(arity, 2) : null!;
-
-        minTimer = new Timer { AutoReset = false, Interval = wait.TotalMilliseconds };
-        minTimer.Elapsed += delegate {
-            minTimerRunning = 0;
+        _minTimer = new Timer { AutoReset = false, Interval = wait.TotalMilliseconds };
+        _minTimer.Elapsed += delegate {
+            _minTimerRunning = 0;
             WaitTimeHasElapsed();
         };
 
         if (maxWait != TimeSpan.Zero) {
-            maxTimer         =  new Timer { AutoReset = false, Interval = maxWait.TotalMilliseconds };
-            maxTimer.Elapsed += delegate { WaitTimeHasElapsed(); };
+            _maxTimer         =  new Timer { AutoReset = false, Interval = maxWait.TotalMilliseconds };
+            _maxTimer.Elapsed += delegate { WaitTimeHasElapsed(); };
         }
     }
 
     private void WaitTimeHasElapsed() {
-        if (!disposed
-            && Interlocked.Exchange(ref queuedInvocations, 0) > 0
-            && (arity != 0 ? Interlocked.Exchange(ref mostRecentInvocationParameters, null) : Throttler.NO_PARAMS) is {} parameters) {
+        if (!_disposed
+            && Interlocked.Exchange(ref _queuedInvocations, 0) > 0
+            && (_arity != 0 ? Interlocked.Exchange(ref _mostRecentInvocationParameters, null) : Throttler.NoParams) is {} parameters) {
 
-            mostRecentResult = (TResult) rateLimitedCallback.DynamicInvoke(parameters);
+            _mostRecentResult = InvokeCallback(parameters);
 
-            if (arity != 0) {
-                parameterArrayPool.Return(parameters);
-            }
-
-            resetTimers();
+            ResetTimers();
         }
     }
 
     private TResult? OnUserInvocation(object[] arguments) {
-        if (!disposed) {
-
-            if (arity != 0 && Interlocked.Exchange(ref mostRecentInvocationParameters, arguments) is {} droppedParameters) {
-                parameterArrayPool.Return(droppedParameters);
+        if (!_disposed) {
+            _mostRecentInvocationParameters = arguments;
+            bool isMinTimerRunning = Interlocked.Exchange(ref _minTimerRunning, 1) != 0;
+            if (_leading && !isMinTimerRunning) {
+                _mostRecentResult = InvokeCallback(arguments);
+            } else if (_trailing) {
+                Interlocked.Add(ref _queuedInvocations, 1);
             }
 
-            bool isMinTimerRunning = Interlocked.Exchange(ref minTimerRunning, 1) != 0;
-            if (leading && !isMinTimerRunning) {
-                mostRecentResult = (TResult) rateLimitedCallback.DynamicInvoke(arguments);
-            } else if (trailing) {
-                Interlocked.Add(ref queuedInvocations, 1);
-            }
-
-            resetTimers();
+            ResetTimers();
         }
 
-        return mostRecentResult;
+        return _mostRecentResult;
     }
 
-    private void resetTimers() {
+    private void ResetTimers() {
         try {
             // #13: Restart minTimer without actually changing its interval, which is better than stopping and starting it because that temporarily sets an internal object to null and can cause a concurrency problem when another thread tries to call a method on the null object
-            minTimer.Interval = minTimer.Interval;
-            minTimer.Start();
-            minTimerRunning = 1;
-            maxTimer?.Start();
+            _minTimer.Interval = _minTimer.Interval;
+            _minTimer.Start();
+            _minTimerRunning = 1;
+            _maxTimer?.Start();
         } catch (ObjectDisposedException) {
             // Do nothing. Don't try to start timers if they have been concurrently disposed of in another thread.
         }
     }
 
     public void Dispose() {
-        disposed = true;
-        minTimer.Dispose();
-        maxTimer?.Dispose();
-        queuedInvocations              = 0;
-        minTimerRunning                = 0;
-        mostRecentResult               = default;
-        mostRecentInvocationParameters = null;
+        if (!_disposed) {
+            _disposed = true;
+            _minTimer.Dispose();
+            _maxTimer?.Dispose();
+            _queuedInvocations              = 0;
+            _minTimerRunning                = 0;
+            _mostRecentResult               = default;
+            _mostRecentInvocationParameters = null;
+        }
     }
 
 }
+
+internal readonly struct Void;

@@ -11,8 +11,9 @@ internal static class OverloadGeneratorMain {
         // Console.WriteLine(generateBuilderMethods(false));
         // Console.WriteLine(generateBuilderMethods(true));
         // Console.WriteLine(generateInterfaces());
-        Console.WriteLine(generateImplementationMethods());
+        //Console.WriteLine(generateImplementationMethods());
         // Console.WriteLine(generateTests());
+        Console.WriteLine(generateDynamicCallbackInvocation());
     }
 
     private static string generateInterfaces() {
@@ -37,15 +38,15 @@ internal static class OverloadGeneratorMain {
         string maxWait    = throttle ? ", wait" : "";
         string actions = string.Join("\n\n", Enumerable.Range(1, MAX_TYPE_PARAMS)
             .Select(i =>
-                $"public static RateLimitedAction<{joinNumbers(i)}> {methodName}<{joinNumbers(i)}>(Action<{joinNumbers(i)}> action, TimeSpan wait, bool leading = {leading.ToString().ToLowerInvariant()}, bool trailing = true) {{\n" +
-                $"\treturn new RateLimiter<{joinNumbers(i)}{string.Join(null, Enumerable.Repeat(", object", MAX_TYPE_PARAMS - i))}, object>(action, wait, leading, trailing{maxWait});\n" +
-                "}"));
+                $"/// <inheritdoc cref=\"{methodName}(Action,TimeSpan,bool,bool)\" />\n" +
+                $"public static RateLimitedAction<{joinNumbers(i)}> {methodName}<{joinNumbers(i)}>(Action<{joinNumbers(i)}> action, TimeSpan wait, bool leading = {leading.ToString().ToLowerInvariant()}, bool trailing = true) =>\n" +
+                $"    new RateLimiter<{joinNumbers(i)}{string.Join(null, Enumerable.Repeat(", object", MAX_TYPE_PARAMS - i))}, Void>(action, {i}, wait, leading, trailing{maxWait});"));
 
         string funcs = string.Join("\n\n", Enumerable.Range(1, MAX_TYPE_PARAMS)
             .Select(i =>
-                $"public static RateLimitedFunc<{joinNumbers(i)}, TResult> {methodName}<{joinNumbers(i)}, TResult>(Func<{joinNumbers(i)}, TResult> func, TimeSpan wait, bool leading = {leading.ToString().ToLowerInvariant()}, bool trailing = true) {{\n" +
-                $"\treturn new RateLimiter<{joinNumbers(i)}{string.Join(null, Enumerable.Repeat(", object", MAX_TYPE_PARAMS - i))}, TResult>(func, wait, leading, trailing{maxWait});\n" +
-                "}"));
+                $"/// <inheritdoc cref=\"{methodName}{{TResult}}(Func{{TResult}},TimeSpan,bool,bool)\" />\n" +
+                $"public static RateLimitedFunc<{joinNumbers(i)}, TResult> {methodName}<{joinNumbers(i)}, TResult>(Func<{joinNumbers(i)}, TResult> func, TimeSpan wait, bool leading = {leading.ToString().ToLowerInvariant()}, bool trailing = true) =>\n" +
+                $"    new RateLimiter<{joinNumbers(i)}{string.Join(null, Enumerable.Repeat(", object", MAX_TYPE_PARAMS - i))}, TResult>(func, {i}, wait, leading, trailing{maxWait});"));
 
         return actions + "\n\n" + funcs;
     }
@@ -53,13 +54,21 @@ internal static class OverloadGeneratorMain {
     private static string generateImplementationMethods() {
         string actions = string.Join("\n\n", Enumerable.Range(1, MAX_TYPE_PARAMS)
             .Select(paramCount =>
-                $"void RateLimitedAction<{joinNumbers(paramCount)}>.Invoke({joinNumbers(paramCount, i => $"T{i} arg{i}")}) {{\n    object[] parameters = parameterArrayPool.Borrow();\n    {joinNumbers(paramCount, i => $"parameters[{i - 1}] = arg{i}!;", "\n    ")} \n    OnUserInvocation(parameters);\n}}"));
+                $"void RateLimitedAction<{joinNumbers(paramCount)}>.Invoke({joinNumbers(paramCount, i => $"T{i} arg{i}")}) =>\n    OnUserInvocation([{joinNumbers(paramCount, "arg", suffix: "!")}]);"));
 
         string funcs = string.Join("\n\n", Enumerable.Range(1, MAX_TYPE_PARAMS)
             .Select(paramCount =>
-                $"TResult? RateLimitedFunc<{joinNumbers(paramCount)}, TResult>.Invoke({joinNumbers(paramCount, i => $"T{i} arg{i}")}) {{\n    object[] parameters = parameterArrayPool.Borrow();\n    {joinNumbers(paramCount, i => $"parameters[{i - 1}] = arg{i}!;", "\n    ")} \n    return OnUserInvocation(parameters);\n}}"));
+                $"TResult? RateLimitedFunc<{joinNumbers(paramCount)}, TResult>.Invoke({joinNumbers(paramCount, i => $"T{i} arg{i}")}) =>\n    OnUserInvocation([{joinNumbers(paramCount, "arg", suffix: "!")}]);"));
 
         return actions + "\n\n" + funcs;
+    }
+
+    private static string generateDynamicCallbackInvocation() {
+        return string.Join('\n', Enumerable.Range(1, MAX_TYPE_PARAMS)
+            .Select(paramCount => {
+                string invocation = $"callback({joinNumbers(min: 0, max: paramCount - 1, prefix: "args[", suffix: "]")})";
+                return $"case {paramCount}:\n    if (hasReturn) return {invocation};\n    {invocation};\n    break;";
+            }));
     }
 
     private static string generateTests() {
@@ -67,16 +76,19 @@ internal static class OverloadGeneratorMain {
             string testMethodNamePrefix = (throttle ? "Throttle" : "Debounce") + (actions ? "Action" : "Func");
             string rateLimitedType      = actions ? "Action" : "Func";
             string classAndMethodName   = throttle ? "Throttler.Throttle" : "Debouncer.Debounce";
-            string propertyName         = actions ? "RateLimitedAction" : "RateLimitedFunc";
+            string methodName           = "Invoke";
             string returnStatement      = actions ? "" : "return \"\";";
-            string returnType           = actions ? "" : ", string";
+            string returnType           = actions ? "" : ", string?";
             string expectation          = throttle ? "1" : "0";
             return string.Join("\n\n", Enumerable.Range(1, MAX_TYPE_PARAMS)
-                .Select(i => $"public class {testMethodNamePrefix}{i}InputsClass: OverloadTests {{\n" +
+                .Select(i => //$"public class {testMethodNamePrefix}{i}InputsClass: OverloadTests {{\n" +
                     $"\t[Fact]\n\tpublic void {testMethodNamePrefix}{i}Inputs() {{\n" +
-                    $"\t\t{rateLimitedType}<{joinRepeat("int", i)}{returnType}> rateLimited = {classAndMethodName}<{joinRepeat("int", i)}{returnType}>(({joinNumbers(i, "arg")}) => {{ ++executionCount; {returnStatement} }}, WAIT_TIME).{propertyName};\n" +
+                    $"\t\t{rateLimitedType}<{joinRepeat("int", i)}{returnType}> rateLimited = {classAndMethodName}<{joinRepeat("int", i)}{returnType}>(({joinNumbers(i, "arg")}) => {{ ++executionCount; {returnStatement} }}, WAIT_TIME).{methodName};\n" +
                     joinRepeat($"\t\trateLimited({joinRepeat("8", i)});", 2, "\n") +
-                    $"\n\t\texecutionCount.Should().Be({expectation});\n\t}}\n}}"));
+                    $"\n\t\texecutionCount.Should().Be({expectation});\n\t}}" +
+                    // "\n}"
+                    ""
+                ));
         }
 
         return string.Join("\n",
