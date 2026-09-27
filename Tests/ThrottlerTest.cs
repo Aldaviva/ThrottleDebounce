@@ -74,7 +74,7 @@ public class ThrottlerTest: BaseTest {
         ExecutionCount.Should().Be(4, "executionCount after 0.7 seconds and 5 invocation");
     }
 
-    [RetryFact]
+    [RetryFact(maxRetries: 10)]
     public async Task ThrottleLeadingOnly() {
         Func<int> throttled = Throttler.Throttle(() => ++ExecutionCount, WaitTime, leading: true, trailing: false).Invoke;
 

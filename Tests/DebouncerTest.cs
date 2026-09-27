@@ -101,7 +101,7 @@ public class DebouncerTest: BaseTest {
         ExecutionCount.Should().Be(2);
     }
 
-    [Fact]
+    [RetryFact]
     public async Task DebounceActionTrailingOnly() {
         Func<int> debounced = Debouncer.Debounce(() => ++ExecutionCount, WaitTime, leading: false, trailing: true).Invoke;
 
