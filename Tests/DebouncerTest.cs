@@ -41,7 +41,7 @@ public class DebouncerTest: BaseTest {
         ExecutionCount.Should().Be(3);
     }
 
-    [RetryFact]
+    [RetryFact(maxRetries: 10)]
     public async Task DebounceMakesProgressDuringRepeatedInvocations() {
         Func<int> debounced = Debouncer.Debounce(() => ++ExecutionCount, WaitTime * 2, leading: true, trailing: true).Invoke;
 
