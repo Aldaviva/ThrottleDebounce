@@ -74,7 +74,7 @@ public class RetrierTest {
     [Fact]
     public async Task AsyncActionRetrySuccess() {
         Failer failer = new(1);
-        await Retrier.Attempt(async _ => await failer.InvokeActionAsync(), new RetryOptions { Delay = _ => TimeSpan.Zero });
+        await Retrier.Attempt(async _ => await failer.InvokeActionAsync(), new AsyncRetryOptions { Delay = _ => TimeSpan.Zero });
         failer.InvocationCount.Should().Be(2);
     }
 
