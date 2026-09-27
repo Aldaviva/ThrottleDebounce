@@ -24,10 +24,10 @@ internal sealed partial class RateLimiter<T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
     internal RateLimiter(Delegate rateLimitedCallback, byte arity, TimeSpan wait, bool leading, bool trailing, TimeSpan maxWait = default) {
         if (!leading && !trailing) {
             throw new ArgumentException($"One or both of the {nameof(leading)} and {nameof(trailing)} arguments must be true, but both were false.");
-        } else if (wait <= TimeSpan.Zero) {
-            throw new ArgumentException("Duration must be positive", nameof(wait));
         } else if (maxWait < TimeSpan.Zero) {
             throw new ArgumentException("Duration must not be negative", nameof(maxWait));
+        } else if (wait <= TimeSpan.Zero) {
+            throw new ArgumentException("Duration must be positive", nameof(wait));
         }
 
         _rateLimitedCallback = rateLimitedCallback;

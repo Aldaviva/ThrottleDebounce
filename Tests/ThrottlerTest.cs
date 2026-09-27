@@ -1,3 +1,5 @@
+using xRetry.v3;
+
 namespace Tests;
 
 public class ThrottlerTest: BaseTest {
@@ -116,7 +118,7 @@ public class ThrottlerTest: BaseTest {
         ExecutionCount.Should().Be(1);
     }
 
-    [Fact]
+    [RetryFact] // when measuring coverage, this test slows down and spuriously fails
     public async Task ThrottleFuncLeadingAndTrailing() {
         Func<int, int> throttled = Throttler.Throttle((int arg) => {
             MostRecentArgument = arg;
@@ -175,6 +177,14 @@ public class ThrottlerTest: BaseTest {
 
         throttled();
         ExecutionCount.Should().Be(0);
+    }
+
+    [Fact]
+    public void ResettingTimersDoesNotCrashIfTimersDisposed() {
+        RateLimitedAction rateLimited = null!;
+        // ReSharper disable once AccessToModifiedClosure - that's the whole point
+        rateLimited = Throttler.Throttle(() => rateLimited.Dispose(), WaitTime);
+        ((Action) rateLimited.Invoke).Should().NotThrow();
     }
 
     [Fact]

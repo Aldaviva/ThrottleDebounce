@@ -52,18 +52,18 @@ public interface IAsyncRetryOptions: IRetryOptions {
 }
 
 /// <inheritdoc cref="IRetryOptions" />
-public record struct RetryOptions(): IAsyncRetryOptions {
+public readonly record struct RetryOptions(): IAsyncRetryOptions {
 
     /// <inheritdoc />
     public long? MaxAttempts {
         get;
-        set => field = value is < 1 ? 1 : value;
+        init => field = value is < 1 ? 1 : value;
     }
 
     /// <inheritdoc />
     public TimeSpan? MaxOverallDuration {
         get;
-        set => field = value switch {
+        init => field = value switch {
             null                                                  => null,
             {} infinite when infinite == Timeout.InfiniteTimeSpan => null,
             {} negative when negative < TimeSpan.Zero             => TimeSpan.Zero,
@@ -72,51 +72,74 @@ public record struct RetryOptions(): IAsyncRetryOptions {
     }
 
     /// <inheritdoc />
-    public Func<long, TimeSpan>? Delay { get; set; }
+    public Func<long, TimeSpan>? Delay { get; init; }
 
     /// <inheritdoc />
-    public Func<Exception, long, bool>? IsRetryAllowed { get; set; }
+    public Func<Exception, long, bool>? IsRetryAllowed { get; init; }
 
     /// <inheritdoc />
-    public Action<Exception, long>? AfterFailure { get; set; }
+    public Action<Exception, long>? AfterFailure { get; init; }
 
     /// <inheritdoc />
-    public Action<Exception, long>? BeforeRetry { get; set; }
+    public Action<Exception, long>? BeforeRetry { get; init; }
 
     /// <inheritdoc />
-    public CancellationToken CancellationToken { get; set; } = CancellationToken.None;
+    public CancellationToken CancellationToken { get; init; } = CancellationToken.None;
 
     /// <inheritdoc cref="IsRetryAllowed" />
-    readonly Func<Exception, long, Task<bool>>? IAsyncRetryOptions.IsRetryAllowed =>
-        IsRetryAllowed is {} isRetryAllowed ? (e, attempt) => Task.FromResult(isRetryAllowed(e, attempt)) : null;
+    Func<Exception, long, Task<bool>>? IAsyncRetryOptions.IsRetryAllowed => IsRetryAllowed is {} isRetryAllowed ? (e, attempt) => {
+        try {
+            return Task.FromResult(isRetryAllowed(e, attempt));
+        } catch (Exception exception) {
+            return taskFromException(exception);
+        }
+    } : null;
 
     /// <inheritdoc cref="AfterFailure" />
-    readonly Func<Exception, long, Task>? IAsyncRetryOptions.AfterFailure => AfterFailure is {} afterFailure ? (attempt, e) => {
-        afterFailure(attempt, e);
-        return Retrier.CompletedTask;
+    Func<Exception, long, Task>? IAsyncRetryOptions.AfterFailure => AfterFailure is {} afterFailure ? (attempt, e) => {
+        try {
+            afterFailure(attempt, e);
+            return Retrier.CompletedTask;
+        } catch (Exception afterFailureException) {
+            return taskFromException(afterFailureException);
+        }
     } : null;
 
     /// <inheritdoc cref="BeforeRetry" />
-    readonly Func<Exception, long, Task>? IAsyncRetryOptions.BeforeRetry => BeforeRetry is {} beforeRetry ? (attempt, e) => {
-        beforeRetry(attempt, e);
-        return Retrier.CompletedTask;
+    Func<Exception, long, Task>? IAsyncRetryOptions.BeforeRetry => BeforeRetry is {} beforeRetry ? (attempt, e) => {
+        try {
+            beforeRetry(attempt, e);
+            return Retrier.CompletedTask;
+        } catch (Exception beforeRetryException) {
+            return taskFromException(beforeRetryException);
+        }
     } : null;
+
+    private static Task<bool> taskFromException(Exception exception) {
+#if NET46_OR_GREATER || NETSTANDARD1_3_OR_GREATER
+        return Task.FromException<bool>(exception);
+#else
+        var taskCompletionSource = new TaskCompletionSource<bool>();
+        taskCompletionSource.SetException(exception);
+        return taskCompletionSource.Task;
+#endif
+    }
 
 }
 
 /// <inheritdoc cref="IAsyncRetryOptions" />
-public record struct AsyncRetryOptions(): IAsyncRetryOptions {
+public readonly record struct AsyncRetryOptions(): IAsyncRetryOptions {
 
     /// <inheritdoc />
     public long? MaxAttempts {
         get;
-        set => field = value is < 1 ? 1 : value;
+        init => field = value is < 1 ? 1 : value;
     }
 
     /// <inheritdoc />
     public TimeSpan? MaxOverallDuration {
         get;
-        set => field = value switch {
+        init => field = value switch {
             null                                                  => null,
             {} infinite when infinite == Timeout.InfiniteTimeSpan => null,
             {} negative when negative < TimeSpan.Zero             => TimeSpan.Zero,
@@ -125,27 +148,27 @@ public record struct AsyncRetryOptions(): IAsyncRetryOptions {
     }
 
     /// <inheritdoc />
-    public Func<long, TimeSpan>? Delay { get; set; }
+    public Func<long, TimeSpan>? Delay { get; init; }
 
     /// <inheritdoc />
-    public CancellationToken CancellationToken { get; set; } = CancellationToken.None;
+    public CancellationToken CancellationToken { get; init; } = CancellationToken.None;
 
     /// <inheritdoc />
-    public Func<Exception, long, Task<bool>>? IsRetryAllowed { get; set; }
+    public Func<Exception, long, Task<bool>>? IsRetryAllowed { get; init; }
 
     /// <inheritdoc />
-    public Func<Exception, long, Task>? AfterFailure { get; set; }
+    public Func<Exception, long, Task>? AfterFailure { get; init; }
 
     /// <inheritdoc />
-    public Func<Exception, long, Task>? BeforeRetry { get; set; }
+    public Func<Exception, long, Task>? BeforeRetry { get; init; }
 
     /// <inheritdoc cref="IsRetryAllowed" />
-    readonly Func<Exception, long, bool>? IRetryOptions.IsRetryAllowed => null;
+    Func<Exception, long, bool>? IRetryOptions.IsRetryAllowed => null;
 
     /// <inheritdoc cref="AfterFailure" />
-    readonly Action<Exception, long>? IRetryOptions.AfterFailure => null;
+    Action<Exception, long>? IRetryOptions.AfterFailure => null;
 
     /// <inheritdoc cref="BeforeRetry" />
-    readonly Action<Exception, long>? IRetryOptions.BeforeRetry => null;
+    Action<Exception, long>? IRetryOptions.BeforeRetry => null;
 
 }

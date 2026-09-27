@@ -204,6 +204,60 @@ public class RetrierTest {
     }
 
     [Fact]
+    public void ActionMaxOverallDurationExceededBeforeRetry() {
+        Failer failer = new();
+        Action thrower = () => Retrier.Attempt(_ => failer.InvokeAction(), new RetryOptions {
+            MaxOverallDuration = TimeSpan.FromMilliseconds(100),
+            BeforeRetry        = (_, _) => Thread.Sleep(250)
+        });
+
+        thrower.Should().ThrowExactly<Failure>();
+        failer.InvocationCount.Should().Be(1);
+    }
+
+    [Fact]
+    public void FuncMaxOverallDurationExceededBeforeRetry() {
+        Failer failer = new();
+        Action thrower = () => Retrier.Attempt(_ => failer.InvokeFunc(), new RetryOptions {
+            MaxOverallDuration = TimeSpan.FromMilliseconds(100),
+            BeforeRetry        = (_, _) => Thread.Sleep(250)
+        });
+
+        thrower.Should().ThrowExactly<Failure>();
+        failer.InvocationCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task AsyncFuncMaxOverallDurationExceededBeforeRetry() {
+        Failer failer = new();
+        Func<Task> thrower = () => Retrier.Attempt(_ => {
+            failer.InvokeAction();
+            return Task.CompletedTask;
+        }, new RetryOptions {
+            MaxOverallDuration = TimeSpan.FromMilliseconds(100),
+            BeforeRetry        = (_, _) => Thread.Sleep(250)
+        });
+
+        await thrower.Should().ThrowExactlyAsync<Failure>();
+        failer.InvocationCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task AsyncFuncTMaxOverallDurationExceededBeforeRetry() {
+        Failer failer = new();
+        Func<Task<int>> thrower = () => Retrier.Attempt(_ => {
+            failer.InvokeAction();
+            return Task.FromResult(-1);
+        }, new RetryOptions {
+            MaxOverallDuration = TimeSpan.FromMilliseconds(100),
+            BeforeRetry        = (_, _) => Thread.Sleep(250)
+        });
+
+        await thrower.Should().ThrowExactlyAsync<Failure>();
+        failer.InvocationCount.Should().Be(1);
+    }
+
+    [Fact]
     public void OnBeforeRetry() {
         Failer     failer          = new(1);
         long?      delayAttempt    = null;
@@ -234,6 +288,9 @@ public class RetrierTest {
     [InlineData(3, 8000)]
     public void ConstantDelay(long afterAttempt, int expectedMillis) {
         Func<long, TimeSpan> delay = Delays.Constant(TimeSpan.FromSeconds(8));
+        delay(afterAttempt).TotalMilliseconds.Should().BeApproximately(expectedMillis, 2);
+
+        delay = Delays.Constant(8000);
         delay(afterAttempt).TotalMilliseconds.Should().BeApproximately(expectedMillis, 2);
     }
 
@@ -284,6 +341,93 @@ public class RetrierTest {
         for (int attempt = 0; attempt < 10; attempt++) {
             delay(attempt).TotalMilliseconds.Should().BeInRange(1000, 10_000);
         }
+
+        delay = Delays.MonteCarlo(TimeSpan.FromSeconds(10));
+        for (int attempt = 0; attempt < 10; attempt++) {
+            delay(attempt).TotalMilliseconds.Should().BeInRange(0, 10_000);
+        }
+    }
+
+    public class RetryOptionsTest {
+
+        [Theory]
+        [InlineData(-1, 1)]
+        [InlineData(0, 1)]
+        [InlineData(1, 1)]
+        [InlineData(2, 2)]
+        public void MaxAttemptsClipping(int maxAttempts, int expected) {
+            new RetryOptions { MaxAttempts      = maxAttempts }.MaxAttempts.Should().Be(expected);
+            new AsyncRetryOptions { MaxAttempts = maxAttempts }.MaxAttempts.Should().Be(expected);
+        }
+
+        [Theory, MemberData(nameof(OptionsMaxOverallDurationData))]
+        public void OptionsMaxOverallDuration(TimeSpan? maxOverallDuration, TimeSpan? expected) {
+            new RetryOptions().MaxOverallDuration.Should().BeNull();
+
+            IAsyncRetryOptions options = new RetryOptions { MaxOverallDuration = maxOverallDuration };
+            options.MaxOverallDuration.Should().Be(expected);
+
+            options = new AsyncRetryOptions { MaxOverallDuration = maxOverallDuration };
+            options.MaxOverallDuration.Should().Be(expected);
+        }
+
+        public static TheoryData<TimeSpan?, TimeSpan?> OptionsMaxOverallDurationData => new() {
+            { null, null },
+            { Timeout.InfiniteTimeSpan, null },
+            { TimeSpan.FromSeconds(-1), TimeSpan.Zero },
+            { TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1) }
+        };
+
+        [Fact]
+        public async Task SyncOptionsForAsyncAttemptSuccess() {
+            bool      afterFailureRan = false, beforeRetryRan = false;
+            Exception exception       = new("test");
+
+            IAsyncRetryOptions options = new RetryOptions {
+                IsRetryAllowed = (_, _) => exception is not OutOfMemoryException,
+                AfterFailure   = (_, _) => afterFailureRan = true,
+                BeforeRetry    = (_, _) => beforeRetryRan = true
+            };
+
+            (await options.IsRetryAllowed!(exception, 0)).Should().BeTrue();
+            await options.AfterFailure!(exception, 0);
+            await options.BeforeRetry!(exception, 0);
+
+            afterFailureRan.Should().BeTrue();
+            beforeRetryRan.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task SyncOptionsForAsyncAttemptFailure() {
+            Exception exception = new("test");
+
+            IAsyncRetryOptions options = new RetryOptions {
+                IsRetryAllowed = (_, _) => throw new ApplicationException("test2"),
+                AfterFailure   = (_, _) => throw new ApplicationException("test2"),
+                BeforeRetry    = (_, _) => throw new ApplicationException("test2")
+            };
+
+            await options.Invoking(o => o.IsRetryAllowed!(exception, 0)).Should().ThrowAsync<ApplicationException>();
+            await options.Invoking(o => o.AfterFailure!(exception, 0)).Should().ThrowAsync<ApplicationException>();
+            await options.Invoking(o => o.BeforeRetry!(exception, 0)).Should().ThrowAsync<ApplicationException>();
+        }
+
+        /// This is impossible due to the type system on the methods that take these types, because instead of taking the IRetryOptions, it takes the RetryOptions.
+        [Fact]
+        public void AsyncOptionsForSyncAttempt() {
+            Exception exception = new("test");
+
+            IRetryOptions options = new AsyncRetryOptions {
+                IsRetryAllowed = (_, _) => Task.FromResult(exception is not OutOfMemoryException),
+                AfterFailure   = (_, _) => Task.CompletedTask,
+                BeforeRetry    = (_, _) => Task.CompletedTask
+            };
+
+            options.IsRetryAllowed.Should().BeNull();
+            options.AfterFailure.Should().BeNull();
+            options.BeforeRetry.Should().BeNull();
+        }
+
     }
 
     private class Failure: Exception;

@@ -96,13 +96,26 @@ public static class Delays {
     /// Wait a random duration before each retry.
     /// </summary>
     /// <remarks>To visualize and play with different strategies and values, check out <see href="https://dotnetfiddle.net/PrDP6x"/>.</remarks>
-    /// <param name="max">The upper limit of the duration to wait</param>
-    /// <param name="min">The lower limit of the duration to wait. Defaults to 0 seconds.</param>
+    /// <param name="min">The lower limit of the duration to wait.</param>
+    /// <param name="max">The upper limit of the duration to wait.</param>
     /// <returns>A function that can be passed to the <c>delay</c> parameter of <c>Retrier.Attempt</c></returns>
-    public static Func<long, TimeSpan> MonteCarlo(TimeSpan max, TimeSpan min = default) {
+    public static Func<long, TimeSpan> MonteCarlo(TimeSpan min, TimeSpan max) {
         Random random = new();
+        if (min > max) {
+            TimeSpan temp = min;
+            min = max;
+            max = temp;
+        }
         long   range  = (max - min).Ticks;
         return _ => (range <= int.MaxValue ? new TimeSpan(random.Next((int) range)) : new TimeSpan((long) (random.NextDouble() * range))) + min;
     }
+
+    /// <summary>
+    /// Wait a random duration before each retry.
+    /// </summary>
+    /// <remarks>To visualize and play with different strategies and values, check out <see href="https://dotnetfiddle.net/PrDP6x"/>.</remarks>
+    /// <param name="max">The upper limit of the duration to wait. The lower limit is <see cref="TimeSpan.Zero"/>, but can be customized by <see cref="MonteCarlo(TimeSpan,TimeSpan)"/>.</param>
+    /// <returns>A function that can be passed to the <c>delay</c> parameter of <c>Retrier.Attempt</c></returns>
+    public static Func<long, TimeSpan> MonteCarlo(TimeSpan max) => MonteCarlo(TimeSpan.Zero, max);
 
 }

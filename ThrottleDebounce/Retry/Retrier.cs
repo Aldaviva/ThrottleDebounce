@@ -89,7 +89,7 @@ public static class Retrier {
         if (typeofT == typeof(Task)) { // Prevent confusing bugs caused by compiler picking the wrong method overload when T is a Task or Task<T>
             return (T) (object) Attempt((Func<long, Task>) (object) func, (IAsyncRetryOptions) options);
         } else if (typeofT.IsGenericType && typeofT.GetGenericTypeDefinition() == typeof(Task<>)) {
-            return (T) AttemptAsyncWithReturnValue.Value.MakeGenericMethod(typeofT.GenericTypeArguments[0]).Invoke(null, [func, options]);
+            return (T) AttemptAsyncWithReturnValue.Value.MakeGenericMethod(typeofT.GenericTypeArguments[0]).Invoke(null, [func, options])!;
         }
 
         Stopwatch  totalDuration = new();

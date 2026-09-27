@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
-        <Version>3.0.0-beta6</Version>
+        <TargetFrameworks>netstandard2.0;net452;netcoreapp3.1</TargetFrameworks>
+        <Version>3.0.0</Version>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <LangVersion>preview</LangVersion>
+        <LangVersion>latest</LangVersion>
         <Authors>Ben Hutchison</Authors>
         <Company>$(Authors)</Company>
         <Copyright>© 2026 $(Authors)</Copyright>
@@ -17,6 +17,7 @@
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <PackageTags>throttle debounce rate limit rate-limit ratelimit retry</PackageTags>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <IncludeSource>true</IncludeSource>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <IncludeSymbols>true</IncludeSymbols>
@@ -32,18 +33,18 @@
     </ItemGroup>
     
     <ItemGroup>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.203" PrivateAssets="All" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="[10.0.112, 10.0.200)" PrivateAssets="All" />
     </ItemGroup>
     
-    <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.0'))">
-        <PackageReference Include="Microsoft.CSharp" Version="4.7.0" /> <!-- DLR -->
+    <!-- DLR -->
+    <ItemGroup Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETStandard'">
+        <PackageReference Include="Microsoft.CSharp" Version="4.7.0" /> 
     </ItemGroup>
-    
-    <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net452'))">
+    <ItemGroup Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETFramework'">
         <Reference Include="Microsoft.CSharp" />
     </ItemGroup>
     
-    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true' or '$(Configuration)' != 'Debug'">
+    <PropertyGroup Condition="'$(CI)' == 'true' or '$(Configuration)' != 'Debug'">
         <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     </PropertyGroup>
 
