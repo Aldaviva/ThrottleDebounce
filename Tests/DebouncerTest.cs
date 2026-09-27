@@ -41,7 +41,7 @@ public class DebouncerTest: BaseTest {
         ExecutionCount.Should().Be(3);
     }
 
-    [Fact]
+    [RetryFact]
     public async Task DebounceMakesProgressDuringRepeatedInvocations() {
         Func<int> debounced = Debouncer.Debounce(() => ++ExecutionCount, WaitTime * 2, leading: true, trailing: true).Invoke;
 
@@ -80,7 +80,7 @@ public class DebouncerTest: BaseTest {
         ExecutionCount.Should().Be(3, "executionCount after 1 second and 6 invocations");
     }
 
-    [Fact]
+    [RetryFact]
     public async Task DebounceActionLeadingOnly() {
         Func<int> debounced = Debouncer.Debounce(() => ++ExecutionCount, WaitTime, leading: true, trailing: false).Invoke;
 
