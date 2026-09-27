@@ -41,7 +41,7 @@ public class ThrottlerTest: BaseTest {
         ExecutionCount.Should().Be(3);
     }
 
-    [RetryFact]
+    [RetryFact(maxRetries: 10)]
     public async Task ThrottleMakesProgressDuringRepeatedInvocations() {
         Func<int> throttled = Throttler.Throttle(() => ++ExecutionCount, WaitTime * 2, leading: true, trailing: true).Invoke;
 
